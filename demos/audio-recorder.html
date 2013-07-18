@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Audio Recording using MediaStreamRecorder</title>
+        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/common.js"> </script>
+        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
+        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/MediaRecorder.js"> </script>
+    </head>
+    <body>
+        <h1>
+            Audio Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
+                                     target="_blank">MediaStreamRecorder</a>
+        </h1>
+        <div id="audios-container"></div>
+        <script>
+            var mediaConstraints = { audio: true };
+            navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+
+            function onMediaSuccess(stream) {
+                var mediaRecorder = new MediaStreamRecorder(stream);
+                mediaRecorder.mimeType = 'audio/ogg';
+                mediaRecorder.ondataavailable = function(blob) {
+                    var a = document.createElement('a');
+                    a.target = '_blank';
+                    a.innerHTML = 'Open Recorded Audio No. ' + (index++);
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        a.href = e.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+
+                    audiosContainer.appendChild(a);
+                    audiosContainer.appendChild(document.createElement('hr'));
+                };
+                mediaRecorder.start(3000);
+            }
+
+            function onMediaError(e) {
+                console.error('media error', e);
+            }
+
+            var audiosContainer = document.getElementById('audios-container');
+            var index = 1;
+        </script>
+    </body>
+</html>
