@@ -7,6 +7,7 @@ This directory contains modules used to record audio stream.
 #### Modules
 
 1. `MediaRecorder.js`
+2. `FlashAudioRecorder.js`
 
 =
 
