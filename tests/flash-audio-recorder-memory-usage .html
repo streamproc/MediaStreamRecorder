@@ -10,7 +10,10 @@
                                      target="_blank">FlashAudioRecorder</a>
         </h1>
         <p>
-            Open Chrome and press Shift+Esc. Then look at your process. Memory grows!
+            Open Chrome and press Shift+Esc. Then look at your process. Or you can see this data at Timeline tab in Chrome Developer Tools.
+        </p>
+        <p>
+            Memory grows!
         </p>
         <script>
             function start() {
@@ -23,8 +26,7 @@
                 }
                 flashRecorder.ondataavailable = function(e) {
                     console.log('blob captured');
-                    delete e;
-                    start();
+                    e = null;
                 }
                 flashRecorder.onready = function(e) {
                     console.log('ready');

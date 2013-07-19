@@ -38,16 +38,21 @@ function FlashAudioRecorder(o)
 	include(options.encoderPath,initEncoder);
 	
 	function init() {
-		Recorder.initialize({
-			swfSrc: options.swfObjectPath,
-			flashContainer: options.flashContainer,
-			onFlashSecurity: function(e) {
-				recorder.onFlashSecurity(e);
-	    	},
-	    	initialized: function(e) {
-	    		recorder.onready();
-	    	}
-		});
+		if (!initialized)
+		{
+			initialized = true;
+			Recorder.initialize({
+				swfSrc: options.swfObjectPath,
+				flashContainer: options.flashContainer,
+				onFlashSecurity: function(e) {
+					recorder.onFlashSecurity(e);
+		    	},
+		    	initialized: function(e) {
+		    		recorder.onready();
+		    	}
+			});
+		}
+		
 	}
 	function initEncoder() {
 		WavEncoder.defaults = {
@@ -80,10 +85,9 @@ function FlashAudioRecorder(o)
 			
 			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 
-			delete datauri;
-			delete data;
-			delete audioBlob;
-			recorder.ondataavailable = null;
+			datauri = null;
+			data = null;
+			audioBlob = null;
 		}
 	}
 	function upload(options) {
