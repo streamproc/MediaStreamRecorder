@@ -137,9 +137,9 @@ function FlashAudioRecorder(o)
 		if (params == null)
 			params = recorder.uploadParams;
 
-		params.success = function(url) {
+		params.success = function(msg) {
 			recorder.ondataavailable({
-				data:url,
+				data:msg,
 				dataType: recorder.dataType
 			});
 			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
