@@ -17,7 +17,7 @@ function FlashAudioRecorder(o)
 			jsLibPath: baseUrl+'lib/recorder.js/recorder.js',
 			encoderPath: baseUrl+'lib/wavencoder/wavencoder.js',
 			flashContainer: null,
-			dataType:'url', // url | blob | raw | dataUri | null
+			dataType:'url', // url | blob | raw | dataUri | false
 			uploadParams:{
 
 			},
@@ -96,7 +96,7 @@ function FlashAudioRecorder(o)
 			{
 				upload();
 			}
-			else if(recorder.dataType != null)
+			else if(recorder.dataType != false)
 			{
 				handleBinaryData();
 			}
@@ -140,7 +140,7 @@ function FlashAudioRecorder(o)
 		params.success = function(msg) {
 			recorder.ondataavailable({
 				data:msg,
-				dataType: recorder.dataType
+				dataType: 'url'
 			});
 			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 		};
