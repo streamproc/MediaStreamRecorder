@@ -1,4 +1,3 @@
-
 # FlashAudioRecorder.js usage
 
 This module based on recorder.js library - https://github.com/jwagener/recorder.js
@@ -9,7 +8,7 @@ It support uploading file after record or getting them as Blob type ro
 ```
   <script src="path_to_MediaStreamRecorder/AudioStreamRecorder/FlashAudioRecorder.js"> </script>
 ```
-## 2. Basid usage - through serverside
+## 2. Basic usage - through serverside
 
 Initialize
 
