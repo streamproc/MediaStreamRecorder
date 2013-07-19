@@ -1,8 +1,8 @@
 
 # FlashAudioRecorder.js usage
 
-This module based on recorder.js library - https://github.com/jwagener/recorder.js
-It support uploading file after record or getting them as Blob type ro 
+    This module based on recorder.js library - https://github.com/jwagener/recorder.js
+    It support uploading file after record or getting them as Blob type ro 
 
 ## 1. Include this module
 
@@ -11,7 +11,7 @@ It support uploading file after record or getting them as Blob type ro
 ```
 ## 2. Basid usage - through serverside
 
-Initialize
+    Initialize
 
 ```
   var flashRecorder = new FlashAudioRecorder({
@@ -23,19 +23,19 @@ Initialize
   });
 ```
 
-Start capture audio:
+    Start capture audio:
 
 ```
   flashRecorder.start();
 ```
 
-Stop capture audio
+    Stop capture audio
 
 ```
   flashRecorder.stop();
 ```
 
-Get uploaded file url (you must write your own serverside script to handle upload.)
+    Get uploaded file url (you must write your own serverside script to handle upload.)
 
 ```
 flashRecorder.ondataavailable = function(e) {
@@ -47,8 +47,8 @@ flashRecorder.ondataavailable = function(e) {
 
 ### dataType
 
-Which type of data should be returned this param used when ondataavailable event appended to instance 
-You can pass value in object instance or directly pass to constructor
+    Which type of data should be returned this param used when ondataavailable event appended to instance 
+    You can pass value in object instance or directly pass to constructor
 
 Example 1:
 ```
@@ -70,10 +70,10 @@ Values:
 #### 'url' - Default
   when record ends, module upload this data immediately
 #### 'blob'
-  call ondataavailable event with blob, that contains all recorded data. Note: this case gives a js memory leaks
-  With 1m record you can get about 300Mb of memory per your process. Use this metho only on short recordings (< 45 sec) 
-  and short-living applications.
-  If you want upload your data immediately after stop recording, its better to use 'url' dataType
+    call ondataavailable event with blob, that contains all recorded data. Note: this case gives a js memory leaks
+    With 1m record you can get about 300Mb of memory per your process. Use this metho only on short recordings (< 45 sec) 
+    and short-living applications.
+    If you want upload your data immediately after stop recording, its better to use 'url' dataType
   Example
 ```javascript
   var flashRecorder = new FlashAudioRecorder({
@@ -88,10 +88,10 @@ Values:
   }
 ```
 #### 'raw' 
-  get recorded array. You can easily edit your record. Same as 'blob' dataType Limitations
+    get recorded array. You can easily edit your record. Same as 'blob' dataType Limitations
 #### 'dataUri'
-  with that type you can easily listen your pre-recorded data or save it to Computer using Javascript File API
-  Same as 'blob' dataType Limitations
+    with that type you can easily listen your pre-recorded data or save it to Computer using Javascript File API
+    Same as 'blob' dataType Limitations
 
   Example
 ```javascript
@@ -111,8 +111,8 @@ Values:
 ## 4. Constructor methods
 
 ### swfObjectPath
-  path to recorder.swf
-  default: baseUrl+'lib/recorder.js/recorder.swf'
+    path to recorder.swf
+    default: baseUrl+'lib/recorder.js/recorder.swf'
 ### jsLibPath
     path to recorder.js
     default:  baseUrl+'lib/recorder.js/recorder.js'
@@ -124,19 +124,30 @@ Values:
     params that will be passed to [Recorder.upload function](https://github.com/jwagener/recorder.js)
     except success and error events (see onerror and ondataavailiable events)
 
-Example 1
+Example 
 ```
   new FlashAudioRecorder({
-    method: "POST"                             // (not implemented) (optional, defaults to POST) HTTP Method can be either POST or PUT 
-    url: "http://api.soundcloud.com/tracks",   // URL to upload to (needs to have a suitable crossdomain.xml for Adobe Flash)
-    audioParam: "track[asset_data]",           // Name for the audio data parameter
-    params: {                                  // Additional parameters (needs to be a flat object)
-      "track[title]": "some track",
-      "oauth_token":  "VALID_TOKEN"
+    uploadParams:{
+      method: "POST"                             // (not implemented) (optional, defaults to POST) HTTP Method can be either POST or PUT 
+      url: "http://api.soundcloud.com/tracks",   // URL to upload to (needs to have a suitable crossdomain.xml for Adobe Flash)
+      audioParam: "track[asset_data]",           // Name for the audio data parameter
+      params: {                                  // Additional parameters (needs to be a flat object)
+        "track[title]": "some track",
+        "oauth_token":  "VALID_TOKEN"
+      }
     }
   })
 ```
-Example 2
+
+
+## 5. Methods
+
+### start
+  start capture audiostream
+### stop
+  stop capture audiostream 
+### upload
+  upload pre-recorded data
 
 ```
   var flashRecorder = new FlashAudioRecorder({
@@ -154,19 +165,11 @@ Example 2
     }
   });
 ```
-## 5. Methods
-
-```
-  // start capture audiostream
-  flashRecorder.start();
-  // stop capture audiostream 
-  flashRecorder.stop();
-```
 
 ## 6. Events
 
-This module supports all events that you can see in [W3C API](https://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/MediaRecorder.html) 
-You can pass any event function in object instance or directly pass it to constructor params
+    This module supports all events that you can see in [W3C API](https://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/MediaRecorder.html) 
+    You can pass any event function in object instance or directly pass it to constructor params
 ```
   var flashRecorder = new FlashAudioRecorder({
     onstart: function() {
@@ -188,7 +191,7 @@ You can pass any event function in object instance or directly pass it to constr
   }
 ```
 
-Also you can bind this events:
+    Also you can bind this events:
 
 ```
   // taken from recorder.js onFlashSecurity event
