@@ -68,12 +68,27 @@ var Recorder = {
 
   upload: function(options){
     options.audioParam = options.audioParam || "audio";
+    options.error      = options.error || console.error;
     options.params     = options.params || {};
+    options.progress   = options.progress || function () {};
+    options.success    = options.success || function () {};
     this.clearBindings("uploadSuccess");
     this.bind("uploadSuccess", function(responseText){
       options.success(Recorder._externalInterfaceDecode(responseText));
     });
-    
+    this.clearBindings("uploadHttpStatus");
+    this.bind("uploadHttpStatus", function(responseText){
+      options.error(Recorder._externalInterfaceDecode(responseText || 'upload error'));
+    });
+    this.clearBindings("uploadIoError");
+    this.bind("uploadIoError", function(responseText){
+      options.error(Recorder._externalInterfaceDecode(responseText || 'upload error'));
+    });
+    this.clearBindings("uploadSecurityError");
+    this.bind("uploadSecurityError", function(responseText){
+      options.error(Recorder._externalInterfaceDecode(responseText || 'upload error'));
+    });
+
     this.flashInterface().upload(options.url, options.audioParam, options.params);
   },
   

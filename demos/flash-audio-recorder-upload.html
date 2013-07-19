@@ -10,7 +10,15 @@
                                      target="_blank">FlashAudioRecorder</a>
         </h1>
         <script>
-            var flashRecorder = new FlashAudioRecorder();
+            var flashRecorder = new FlashAudioRecorder({
+                uploadParams:{
+                    method: "POST",
+                    url: "http://url",
+                    audioParam: "qqfile",
+                    params: {}
+                }
+            });
+            
             flashRecorder.onstart = function(e) {
                 console.log('start');
             }
@@ -18,15 +26,15 @@
                 console.log('stop');
             }
             flashRecorder.ondataavailable = function(e) {
-                console.log('blob captured');
+                console.log('file url:'+e.url);
             }
             flashRecorder.onready = function(e) {
                 console.log('ready');
-                flashRecorder.start();
-                setTimeout(function(){
-                    flashRecorder.stop();
-                }, 10000);
             }
+            flashRecorder.start();
+            setTimeout(function(){
+                flashRecorder.stop();
+            }, 2000);
         </script>
     </body>
 </html>

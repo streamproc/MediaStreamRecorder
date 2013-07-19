@@ -17,6 +17,10 @@ function FlashAudioRecorder(o)
 			jsLibPath: baseUrl+'lib/recorder.js/recorder.js',
 			encoderPath: baseUrl+'lib/wavencoder/wavencoder.js',
 			flashContainer: null,
+			dataType:'url', // url | blob | raw | dataUri | null
+			uploadParams:{
+
+			},
 			ondataavailable: null,
 			onstop: function(e) {
 
@@ -29,18 +33,20 @@ function FlashAudioRecorder(o)
     		},
     		onready: function(e) {
 
+    		},
+    		onerror: function(e) {
+
     		}
 		},
-		initialized = false,
+		_initialized = false,
+		_startRequest = false,
 		options = extend(defaults,o);
 
 	include(options.jsLibPath,init);
-	include(options.encoderPath,initEncoder);
 	
 	function init() {
-		if (!initialized)
+		if (!_initialized)
 		{
-			initialized = true;
 			Recorder.initialize({
 				swfSrc: options.swfObjectPath,
 				flashContainer: options.flashContainer,
@@ -49,6 +55,12 @@ function FlashAudioRecorder(o)
 		    	},
 		    	initialized: function(e) {
 		    		recorder.onready();
+		    		
+		    		_initialized = true;
+
+		    		if (_startRequest) {
+						start();
+					}
 		    	}
 			});
 		}
@@ -63,35 +75,81 @@ function FlashAudioRecorder(o)
 		};
 	}
 	function start(interval) {
-		Recorder.record({
-			start: function(e) {
-    			recorder.onstart(e);
-    		}
-  		});
+		_startRequest = true;
+		if (_initialized)
+		{
+			_startRequest = false;
+			Recorder.record({
+				start: function(e) {
+	    			recorder.onstart(e);
+	    		}
+	  		});
+		}
 	}
 	function stop() {
+		_startRequest = false;
 		Recorder.stop();
 		recorder.onstop();
 		if (typeof recorder.ondataavailable == 'function') {
-			var data = Recorder.audioData(),
-				datauri = WavEncoder.encode(data),
-				audioBlob = new Blob([datauri], {
-			        type: 'audio/wav'
-			    });
 
-			recorder.ondataavailable({
-				data: audioBlob
-			});
-			
-			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
-
-			datauri = null;
-			data = null;
-			audioBlob = null;
+			if (recorder.dataType == 'url')
+			{
+				upload();
+			}
+			else if(recorder.dataType != null)
+			{
+				handleBinaryData();
+			}
 		}
 	}
-	function upload(options) {
-		Recorder.upload(options);
+	function handleBinaryData() {
+		var data = Recorder.audioData();
+		if (recorder.dataType == 'raw') {
+			return recorder.ondataavailable({
+				data: data,
+				dataType: recorder.dataType
+			});
+		};
+		Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
+
+		include(options.encoderPath,function(){
+			initEncoder();
+			var datauri = WavEncoder.encode(data);
+			if (recorder.dataType == 'datauri') {
+				return recorder.ondataavailable({
+					data: datauri,
+					dataType: recorder.dataType
+				});
+			};
+			var audioBlob = new Blob([datauri], {
+		        type: 'audio/wav'
+		    });
+		    if (recorder.dataType == 'blob') {
+				return recorder.ondataavailable({
+					data: audioBlob,
+					dataType: recorder.dataType
+				});
+			};
+		});
+		
+	}
+	function upload(params) {
+		if (params == null)
+			params = recorder.uploadParams;
+
+		params.success = function(url) {
+			recorder.ondataavailable({
+				data:url,
+				dataType: recorder.dataType
+			});
+			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
+		};
+		params.error = function(msg) {
+			recorder.onerror({
+				msg:msg
+			});
+		}
+		Recorder.upload(params);
 	}
 	// get script folder
 	function getBaseUrl() {
@@ -157,7 +215,11 @@ function FlashAudioRecorder(o)
 	this.onstop = options.onstop;
 	this.onstart = options.onstart;
 	this.onFlashSecurity = options.onFlashSecurity;
+	this.onerror = options.onready;
 	this.onready = options.onready;
+
+	this.uploadParams = options.uploadParams;
+	this.dataType = options.dataType;
 
 	this.start = start;
 	this.upload = upload;
