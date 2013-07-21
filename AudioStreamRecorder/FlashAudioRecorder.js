@@ -5,12 +5,13 @@
 // ==========================================================
 // FlashAudioRecorder.js
 // Based on recorder.js - https://github.com/jwagener/recorder.js
+
 function FlashAudioRecorder(o)
 {
 	if (o  == null) {
 		o = {};
 	}
-	var recorder = this,
+	var self = this,
 		baseUrl = getBaseUrl(),
 		defaults = {
 			swfObjectPath: baseUrl+'lib/recorder.js/recorder.swf',
@@ -51,10 +52,10 @@ function FlashAudioRecorder(o)
 				swfSrc: options.swfObjectPath,
 				flashContainer: options.flashContainer,
 				onFlashSecurity: function(e) {
-					recorder.onFlashSecurity(e);
+					self.onFlashSecurity(e);
 		    	},
 		    	initialized: function(e) {
-		    		recorder.onready();
+		    		self.onready();
 		    		
 		    		_initialized = true;
 
@@ -78,74 +79,95 @@ function FlashAudioRecorder(o)
 		_startRequest = true;
 		if (_initialized)
 		{
+			if (self.state != 'inactive') {
+				var error ={
+					message: 'The object is in an invalid state',
+					code:DOMException.INVALID_STATE_ERR
+				}
+				self.onerror(error);
+				throw error;
+			}
+			self.state = 'recording';
+				
 			_startRequest = false;
 			Recorder.record({
 				start: function(e) {
-	    			recorder.onstart(e);
+	    			self.onstart(e);
 	    		}
 	  		});
 		}
 	}
 	function stop() {
+		if (self.state == 'inactive') {
+			var error ={
+				message: 'The object is in an invalid state',
+				code:DOMException.INVALID_STATE_ERR
+			}
+			self.onerror(error);
+			throw error;
+		}
+		self.state = 'inactive';
 		_startRequest = false;
 		Recorder.stop();
-		recorder.onstop();
+		self.onstop();
 		if (typeof recorder.ondataavailable == 'function') {
 
-			if (recorder.dataType == 'url')
+			if (self.dataType == 'url')
 			{
 				upload();
 			}
-			else if(recorder.dataType != false)
+			else if(self.dataType != false)
 			{
 				handleBinaryData();
 			}
 		}
 	}
 	function handleBinaryData() {
-		var data = Recorder.audioData();
-		if (recorder.dataType == 'raw') {
-			return recorder.ondataavailable({
-				data: data,
-				dataType: recorder.dataType
-			});
-		};
-		Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
+		Recorder.getAudioData(function(data){
+			if (self.dataType == 'raw') {
+				return self.ondataavailable({
+					data: data,
+					dataType: self.dataType
+				});
+			};
+			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 
-		include(options.encoderPath,function(){
-			initEncoder();
-			var datauri = WavEncoder.encode(data);
-			if (recorder.dataType == 'datauri') {
-				return recorder.ondataavailable({
-					data: datauri,
-					dataType: recorder.dataType
-				});
-			};
-			var audioBlob = new Blob([datauri], {
-		        type: 'audio/wav'
-		    });
-		    if (recorder.dataType == 'blob') {
-				return recorder.ondataavailable({
-					data: audioBlob,
-					dataType: recorder.dataType
-				});
-			};
+			include(options.encoderPath,function(){
+				initEncoder();
+				var datauri = WavEncoder.encode(data);
+				if (self.dataType == 'datauri') {
+					return self.ondataavailable({
+						data: datauri,
+						dataType: self.dataType
+					});
+				};
+				var audioBlob = new Blob([datauri], {
+			        type: self.mimeType
+			    });
+			    if (self.dataType == 'blob') {
+					return self.ondataavailable({
+						data: audioBlob,
+						dataType: self.dataType
+					});
+				};
+			});
 		});
+		
 		
 	}
 	function upload(params) {
 		if (params == null)
-			params = recorder.uploadParams;
+			params = self.uploadParams;
 
 		params.success = function(msg) {
-			recorder.ondataavailable({
+			self.ondataavailable({
 				data:msg,
 				dataType: 'url'
 			});
 			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 		};
 		params.error = function(msg) {
-			recorder.onerror({
+			self.onerror({
 				msg:msg
 			});
 		}
@@ -215,8 +237,10 @@ function FlashAudioRecorder(o)
 	this.onstop = options.onstop;
 	this.onstart = options.onstart;
 	this.onFlashSecurity = options.onFlashSecurity;
-	this.onerror = options.onready;
+	this.onerror = options.onerror;
 	this.onready = options.onready;
+	this.state = 'inactive';
+	this.mimeType = 'audio/wav';
 
 	this.uploadParams = options.uploadParams;
 	this.dataType = options.dataType;
