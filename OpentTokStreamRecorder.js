@@ -15,8 +15,9 @@ function OpenTokStreamRecorder(o) {
 			remoteToken: null,
 			remoteArchive: null,
 			saveAterStop: true,
-			container: document.body,
+			container: null,
 			debug:false,
+			pollWhileProcessing: true,
 			style: null, // null | 'blank' | object (see http://www.tokbox.com/opentok/docs/js/reference/Recorder.html)
 			loadingDuration:2000, // dirty hack while opentox doesnt support onready event
 			onerror: function() {
@@ -29,6 +30,9 @@ function OpenTokStreamRecorder(o) {
 
 			},
 			ondataavailable: function() {
+
+			},
+			onready: function() {
 
 			}
 		},
@@ -45,7 +49,7 @@ function OpenTokStreamRecorder(o) {
 		_startRequest = false,
 		options = extend(defaults,o),
 		recorder;
-
+ 
 	include('https://swww.tokbox.com/v1.1/js/TB.min.js',init);
 
 	function init() {
@@ -109,10 +113,11 @@ function OpenTokStreamRecorder(o) {
 				TB.setLogLevel( TB.DEBUG ); // Prints out logging messages in console
 			}
 			var recorderManager = TB.initRecorderManager(options.apiKey),
-				recDiv = document.createElement('div');
-			    
+				recDiv = document.createElement('div'),
+				container = o.container == null ? document.body: o.container;
+			   
 		    recDiv.setAttribute('id', 'recorderElement');
-		    options.container.appendChild(recDiv);
+		    container.appendChild(recDiv);
 		    recorder = recorderManager.displayRecorder(options.token, recDiv.id);
 		    recorder.addEventListener('recordingStarted', self.onstart);
 		    recorder.addEventListener('recordingStopped', self.onstop); 
@@ -149,7 +154,7 @@ function OpenTokStreamRecorder(o) {
 	    	else {
 	    		_initialized = true;
 	    	}
-		    
+		    self.onready();
 		    
 		}
 	}
@@ -167,13 +172,8 @@ function OpenTokStreamRecorder(o) {
 				params = options.remoteArchive;
 			}
 
-			getUrlData(params,
-				function(url){
-					self.ondataavailable({
-			    		data: url,
-			    		dataType: 'url'
-			    	});
-				});
+			getVideoURL(params);
+			
 		}
 		else {
 			self.ondataavailable({
@@ -182,6 +182,21 @@ function OpenTokStreamRecorder(o) {
 	    	});
 		}
 		
+	}
+	function getVideoURL(params){
+		getUrlData(params,
+			function(answer){
+				if (answer == 'not_ready'&&self.pollWhileProcessing) {
+					getVideoURL(params)
+				}
+				else {
+					self.ondataavailable({
+			    		data: answer,
+			    		dataType: 'url'
+			    	});
+				}
+			}
+		);
 	}
 	function getUrlData(params,callback) {
 		if (typeof params == 'string') {
@@ -305,6 +320,7 @@ function OpenTokStreamRecorder(o) {
 	this.onstart = options.onstart;
 	this.onstop = options.onstop;
 	this.onerror = options.onerror;
+	this.onready = options.onready;
 	this.start = start;
 	this.stop = stop;
 	this.save = save;
