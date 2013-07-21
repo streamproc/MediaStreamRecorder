@@ -20,7 +20,9 @@ function FlashAudioRecorder(o)
 			flashContainer: null,
 			dataType:'url', // url | blob | raw | dataUri | false
 			uploadParams:{
-
+				url:'',
+				audioParam:"",
+				params:{}
 			},
 			ondataavailable: null,
 			onstop: function(e) {
@@ -30,10 +32,12 @@ function FlashAudioRecorder(o)
 
 			},
 			onFlashSecurity: function(e) {
-
+				var flashContainer = Recorder.options.flashContainer;
+			    flashContainer.style.left   = ((window.innerWidth  || document.body.offsetWidth)  / 2) - 115 + "px";
+			    flashContainer.style.top    = ((window.innerHeight || document.body.offsetHeight) / 2) - 70  + "px";
     		},
     		onready: function(e) {
-
+    			
     		},
     		onerror: function(e) {
 
@@ -48,6 +52,8 @@ function FlashAudioRecorder(o)
 	function init() {
 		if (!_initialized)
 		{
+			Recorder._defaultOnShowFlash = true;
+
 			Recorder.initialize({
 				swfSrc: options.swfObjectPath,
 				flashContainer: options.flashContainer,
@@ -152,7 +158,7 @@ function FlashAudioRecorder(o)
 			});
 		});
 		
-		
+
 	}
 	function upload(params) {
 		if (params == null)
