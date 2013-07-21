@@ -92,19 +92,28 @@ var Recorder = {
     this.flashInterface().upload(options.url, options.audioParam, options.params);
   },
   
-  audioData: function(newData){
-    var delimiter = ";", newDataSerialized, stringData, data = [], sample;
+  getAudioData: function(callback){
+    var data = '', self = this;
+    this.bind("getAudioDataPart", function(value) {
+      data += value;
+    });
+    this.bind("getAudioDataEnd", function() {
+      callback(data.split(';'));
+      data = '';
+
+      self.clearBindings("getAudioDataStart");
+      self.clearBindings("getAudioDataPart");
+      self.clearBindings("getAudioDataEnd");
+    });
+
+    this.flashInterface().getAudioData();
+  },
+  setAudioData: function(newData){
+    var delimiter = ";", newDataSerialized, stringData;
     if(newData){
       newDataSerialized = newData.join(";");
     }
-    stringData = this.flashInterface().audioData(newDataSerialized).split(delimiter);
-    for(var i=0; i < stringData.length; i ++){
-      sample = parseFloat(stringData[i]);
-      if(!isNaN(sample)){
-        data.push(sample);
-      }
-    }
-    return data;
+    this.flashInterface().setAudioData(newDataSerialized)
   },
 
   request: function(method, uri, contentType, data, callback){
