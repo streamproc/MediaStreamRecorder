@@ -34,6 +34,9 @@ function OpenTokStreamRecorder(o) {
 			},
 			onready: function() {
 
+			},
+			onsavecomplete: function() {
+
 			}
 		},
 		remoteDefaults = {
@@ -159,6 +162,8 @@ function OpenTokStreamRecorder(o) {
 		}
 	}
 	function onArchiveSaved (e) {
+		self.onsavecomplete();
+		
 		if (options.remoteArchive != null) {
 			var params = {},url;
 
@@ -321,6 +326,7 @@ function OpenTokStreamRecorder(o) {
 	this.onstop = options.onstop;
 	this.onerror = options.onerror;
 	this.onready = options.onready;
+	this.onsavecomplete = options.onsavecomplete;
 	this.start = start;
 	this.stop = stop;
 	this.save = save;
