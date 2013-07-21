@@ -110,7 +110,7 @@ function FlashAudioRecorder(o)
 		_startRequest = false;
 		Recorder.stop();
 		self.onstop();
-		if (typeof recorder.ondataavailable == 'function') {
+		if (typeof self.ondataavailable == 'function') {
 
 			if (self.dataType == 'url')
 			{
@@ -130,7 +130,6 @@ function FlashAudioRecorder(o)
 					dataType: self.dataType
 				});
 			};
-			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 
 			include(options.encoderPath,function(){
 				initEncoder();
@@ -164,7 +163,6 @@ function FlashAudioRecorder(o)
 				data:msg,
 				dataType: 'url'
 			});
-			Recorder.options.flashContainer.parentNode.removeChild(Recorder.options.flashContainer);
 		};
 		params.error = function(msg) {
 			self.onerror({
