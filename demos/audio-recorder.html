@@ -1,24 +1,36 @@
+<!--
+> Muaz Khan     - https://github.com/muaz-khan 
+> neizerth      - https://github.com/neizerth
+> MIT License   - https://www.webrtc-experiment.com/licence/
+> Documentation - https://github.com/streamproc/MediaStreamRecorder
+> =================================================================
+> audio-recorder.html
+-->
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <title>Audio Recording using MediaStreamRecorder</title>
-        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/common.js"> </script>
         <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
+        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/StereoRecorder.js"> </script>
         <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/MediaRecorder.js"> </script>
+        <!-- Workers -->
+        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/Workers/StereoAudioRecorder-Worker.js"> </script>
     </head>
     <body>
         <h1>
             Audio Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
                                      target="_blank">MediaStreamRecorder</a>
         </h1>
-        <div id="audios-container"></div>
+        <div id="audios-container">
+        </div>
         <script>
             var mediaConstraints = { audio: true };
-            navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+            navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
             function onMediaSuccess(stream) {
                 var mediaRecorder = new MediaStreamRecorder(stream);
                 mediaRecorder.mimeType = 'audio/ogg';
+                mediaRecorder.workerPath = 'https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/Workers/StereoAudioRecorder-Worker.js';
                 mediaRecorder.ondataavailable = function(blob) {
                     var a = document.createElement('a');
                     a.target = '_blank';
@@ -33,7 +45,9 @@
                     audiosContainer.appendChild(a);
                     audiosContainer.appendChild(document.createElement('hr'));
                 };
-                mediaRecorder.start(3000);
+
+                // get blob after each 5 second!
+                mediaRecorder.start(5 * 1000);
             }
 
             function onMediaError(e) {

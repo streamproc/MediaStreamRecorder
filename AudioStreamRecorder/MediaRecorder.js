@@ -1,6 +1,6 @@
-// @muazkh - github.com/muaz-khan 
-// neizerth - github.com/neizerth
-// MIT License - https://webrtc-experiment.appspot.com/licence/
+// Muaz Khan     - https://github.com/muaz-khan 
+// neizerth      - https://github.com/neizerth
+// MIT License   - https://www.webrtc-experiment.com/licence/
 // Documentation - https://github.com/streamproc/MediaStreamRecorder
 // ==========================================================
 // MediaRecorder.js
@@ -33,7 +33,9 @@ function MediaRecorder(mediaStream) {
             }
 
             self.onstop();
-        }; // void start(optional long timeSlice)
+        };
+
+        // void start(optional long timeSlice)
         mediaRecorder.start(timeSlice);
     };
 

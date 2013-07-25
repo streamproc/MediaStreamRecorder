@@ -7,6 +7,7 @@ This directory contains demos using `MediaStreamRecorder.js` to record audio/vid
 #### Demos
 
 1. [Audio Recording using MediaStreamRecorder](https://www.webrtc-experiment.com/MediaStreamRecorder/demos/audio-recorder.html)
+2. [Video/Gif Recording using MediaStreamRecorder](https://www.webrtc-experiment.com/MediaStreamRecorder/demos/video-recorder.html)
 
 =
 

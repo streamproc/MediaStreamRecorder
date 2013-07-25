@@ -6,7 +6,8 @@ This directory contains modules used to record video stream.
 
 #### Modules
 
-No module yet.
+1. `WhammyRecorder.js`
+2. `GifRecorder.js`
 
 =
 
