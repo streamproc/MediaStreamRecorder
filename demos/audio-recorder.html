@@ -13,8 +13,6 @@
         <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
         <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/StereoRecorder.js"> </script>
         <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/MediaRecorder.js"> </script>
-        <!-- Workers -->
-        <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/Workers/StereoAudioRecorder-Worker.js"> </script>
     </head>
     <body>
         <h1>
@@ -30,7 +28,6 @@
             function onMediaSuccess(stream) {
                 var mediaRecorder = new MediaStreamRecorder(stream);
                 mediaRecorder.mimeType = 'audio/ogg';
-                mediaRecorder.workerPath = 'https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/Workers/StereoAudioRecorder-Worker.js';
                 mediaRecorder.ondataavailable = function(blob) {
                     var a = document.createElement('a');
                     a.target = '_blank';

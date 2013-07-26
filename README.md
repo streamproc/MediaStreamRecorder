@@ -26,10 +26,6 @@ navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
     mediaRecorder.mimeType = 'audio/ogg';
-	
-    // For Chrome; web-worker file
-    mediaRecorder.workerPath = 'https://www.webrtc-experiment.com/AudioStreamRecorder/Workers/StereoAudioRecorder-Worker.js';
-	
     mediaRecorder.ondataavailable = function (blob) {
         // POST/PUT "Blob" using FormData/XHR2
 
@@ -51,7 +47,7 @@ function onMediaError(e) {
 
 =
 
-#### Record video using MediaStreamRecorder.js
+#### Record video/gif using MediaStreamRecorder.js
 
 ```html
 <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
@@ -59,48 +55,6 @@ function onMediaError(e) {
 <!-- Using Whammy to record WebM files -->
 <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/WhammyRecorder.js"> </script>
 <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/lib/whammy.js"> </script>
-```
-
-```javascript
-var mediaConstraints = {
-    video: true
-};
-
-navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
-
-function onMediaSuccess(stream) {
-    var mediaRecorder = new MediaStreamRecorder(stream);
-    mediaRecorder.mimeType = 'video/webm';
-	
-    mediaRecorder.videoWidth = 320;
-    mediaRecorder.videoHeight = 240;
-	
-    mediaRecorder.ondataavailable = function (blob) {
-        // POST/PUT "Blob" using FormData/XHR2
-
-        // or read as DataURL
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var dataURL = e.target.result;
-            window.open(dataURL);
-        };
-        reader.readAsDataURL(blob);
-    };
-    mediaRecorder.start(3000);
-}
-
-function onMediaError(e) {
-    console.error('media error', e);
-}
-```
-
-
-=
-
-#### Record gif using MediaStreamRecorder.js
-
-```html
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
 
 <!-- Using jsGIF to record GIF files -->
 <script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/GifRecorder.js"> </script>
@@ -116,13 +70,13 @@ navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
-    mediaRecorder.mimeType = 'image/gif';
+    mediaRecorder.mimeType = 'video/webm';
+	
+    // for gif recording
+    // mediaRecorder.mimeType = 'image/gif';
 	
     mediaRecorder.videoWidth = 320;
     mediaRecorder.videoHeight = 240;
-	
-    // mediaRecorder.frameRate = 300;
-    // mediaRecorder.quality = 1;
 	
     mediaRecorder.ondataavailable = function (blob) {
         // POST/PUT "Blob" using FormData/XHR2
@@ -142,6 +96,16 @@ function onMediaError(e) {
     console.error('media error', e);
 }
 ```
+
+=
+
+##### Browser Support
+
+| Browser        | Support           |
+| ------------- |-------------|
+| Firefox | [Stable](http://www.mozilla.org/en-US/firefox/new/) / [Aurora](http://www.mozilla.org/en-US/firefox/aurora/) / [Nightly](http://nightly.mozilla.org/) |
+| Google Chrome | [Stable](https://www.google.com/intl/en_uk/chrome/browser/) / [Canary](https://www.google.com/intl/en/chrome/browser/canary.html) / [Beta](https://www.google.com/intl/en/chrome/browser/beta.html) / [Dev](https://www.google.com/intl/en/chrome/browser/index.html?extra=devchannel#eula) |
+| Android | [Chrome Beta](https://play.google.com/store/apps/details?id=com.chrome.beta&hl=en) |
 
 =
 
