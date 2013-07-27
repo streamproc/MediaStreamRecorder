@@ -7,13 +7,7 @@ A cross-browser implementation to record audio/video streams.
 #### Record audio using MediaStreamRecorder.js
 
 ```html
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
-
-<!-- For Firefox (Nightly) -->
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/MediaRecorder.js"> </script>
-
-<!-- For Chrome -->
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/AudioStreamRecorder/StereoRecorder.js"> </script>
+<script src="https://www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 ```
 
 ```javascript
@@ -50,15 +44,7 @@ function onMediaError(e) {
 #### Record video/gif using MediaStreamRecorder.js
 
 ```html
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/MediaStreamRecorder.js"> </script>
-
-<!-- Using Whammy to record WebM files -->
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/WhammyRecorder.js"> </script>
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/lib/whammy.js"> </script>
-
-<!-- Using jsGIF to record GIF files -->
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/GifRecorder.js"> </script>
-<script src="https://www.webrtc-experiment.com/MediaStreamRecorder/VideoStreamRecorder/lib/gif-encoder.js"> </script>
+<script src="https://www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 ```
 
 ```javascript
