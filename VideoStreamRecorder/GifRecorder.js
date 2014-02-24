@@ -80,13 +80,17 @@ function GifRecorder(mediaStream) {
                 // bug: find a way to clear old recorded blobs
                 gifEncoder.stream().bin = [];
 
-                getWebMBlob();
+				if (lastAnimationFrame)
+					getWebMBlob();
             }, timeSlice);
         })();
     };
 
     this.stop = function() {
-        if (lastAnimationFrame) cancelAnimationFrame(lastAnimationFrame);
+        if (lastAnimationFrame) {
+			cancelAnimationFrame(lastAnimationFrame);
+			lastAnimationFrame = false;
+		}
     };
 
     this.ondataavailable = function() {};
