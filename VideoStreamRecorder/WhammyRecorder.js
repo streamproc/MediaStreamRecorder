@@ -52,14 +52,17 @@ function WhammyRecorder(mediaStream) {
                 self.ondataavailable(WebM_Blob);
 
                 whammy.frames = [];
-                getWebMBlob();
+				if (lastAnimationFrame)
+					getWebMBlob();
             }, timeSlice);
         })();
     };
 
     this.stop = function() {
-        if (lastAnimationFrame)
+        if (lastAnimationFrame) {
             cancelAnimationFrame(lastAnimationFrame);
+			lastAnimationFrame = false;
+		}
     };
 
     this.ondataavailable = function() {};
