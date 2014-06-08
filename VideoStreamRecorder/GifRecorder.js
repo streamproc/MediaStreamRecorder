@@ -20,27 +20,27 @@ function GifRecorder(mediaStream) {
         // external library to record as GIF images
         gifEncoder = new GIFEncoder();
 
-        // void setRepeat(int iter) 
-        // Sets the number of times the set of GIF frames should be played. 
+        // void setRepeat(int iter)
+        // Sets the number of times the set of GIF frames should be played.
         // Default is 1; 0 means play indefinitely.
         gifEncoder.setRepeat(0);
 
-        // void setFrameRate(Number fps) 
-        // Sets frame rate in frames per second. 
+        // void setFrameRate(Number fps)
+        // Sets frame rate in frames per second.
         // Equivalent to setDelay(1000/fps).
         // Using "setDelay" instead of "setFrameRate"
         gifEncoder.setDelay(this.frameRate || 200);
 
-        // void setQuality(int quality) 
-        // Sets quality of color quantization (conversion of images to the 
-        // maximum 256 colors allowed by the GIF specification). 
-        // Lower values (minimum = 1) produce better colors, 
-        // but slow processing significantly. 10 is the default, 
-        // and produces good color mapping at reasonable speeds. 
+        // void setQuality(int quality)
+        // Sets quality of color quantization (conversion of images to the
+        // maximum 256 colors allowed by the GIF specification).
+        // Lower values (minimum = 1) produce better colors,
+        // but slow processing significantly. 10 is the default,
+        // and produces good color mapping at reasonable speeds.
         // Values greater than 20 do not yield significant improvements in speed.
         gifEncoder.setQuality(this.quality || 10);
 
-        // Boolean start() 
+        // Boolean start()
         // This writes the GIF Header and returns false if it fails.
         gifEncoder.start();
 
@@ -68,33 +68,33 @@ function GifRecorder(mediaStream) {
 
         lastAnimationFrame = requestAnimationFrame(drawVideoFrame);
 
-        (function getWebMBlob() {
-            setTimeout(function() {
-                endTime = Date.now();
+        timeout = setTimeout(doneRecording, timeSlice);
+    };
 
-                var gifBlob = new Blob([new Uint8Array(gifEncoder.stream().bin)], {
-                    type: 'image/gif'
-                });
-                self.ondataavailable(gifBlob);
+    function doneRecording() {
+        endTime = Date.now();
 
-                // bug: find a way to clear old recorded blobs
-                gifEncoder.stream().bin = [];
+        var gifBlob = new Blob([new Uint8Array(gifEncoder.stream().bin)], {
+            type: 'image/gif'
+        });
+        self.ondataavailable(gifBlob);
 
-				if (lastAnimationFrame)
-					getWebMBlob();
-            }, timeSlice);
-        })();
+        // bug: find a way to clear old recorded blobs
+        gifEncoder.stream().bin = [];
     };
 
     this.stop = function() {
         if (lastAnimationFrame) {
-			cancelAnimationFrame(lastAnimationFrame);
-			lastAnimationFrame = false;
-		}
+            cancelAnimationFrame(lastAnimationFrame);
+            clearTimeout(timeout);
+            doneRecording();
+        }
     };
 
-    this.ondataavailable = function() {};
-    this.onstop = function() {};
+    this.ondataavailable = function() {
+    };
+    this.onstop = function() {
+    };
 
     // Reference to itself
     var self = this;
@@ -112,4 +112,5 @@ function GifRecorder(mediaStream) {
     var startTime, endTime, lastFrameTime;
 
     var gifEncoder;
+    var timeout;
 }

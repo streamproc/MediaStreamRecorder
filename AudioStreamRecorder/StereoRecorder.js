@@ -13,27 +13,33 @@ function StereoRecorder(mediaStream) {
 
         mediaRecorder = new StereoAudioRecorder(mediaStream, this);
 
-        (function looper() {
-            mediaRecorder.record();
+        mediaRecorder.record();
 
-            setTimeout(function() {
-                mediaRecorder.stop();
-                looper();
-            }, timeSlice);
-        })();
+        timeout = setTimeout(function() {
+            mediaRecorder.stop();
+        }, timeSlice);
     };
 
     this.stop = function() {
-        if (mediaRecorder) mediaRecorder.stop();
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            clearTimeout(timeout);
+        }
     };
 
-    this.ondataavailable = function() {};
+    this.ondataavailable = function() {
+    };
 
     // Reference to "StereoAudioRecorder" object
     var mediaRecorder;
+    var timeout;
 }
 
+// ======================
+// StereoAudioRecorder.js
+
 // source code from: http://typedarray.org/wp-content/projects/WebAudioRecorder/script.js
+
 function StereoAudioRecorder(mediaStream, root) {
     // variables
     var leftchannel = [];
@@ -147,9 +153,9 @@ function StereoAudioRecorder(mediaStream, root) {
     // connect the stream to the gain node
     audioInput.connect(volume);
 
-    /* From the spec: This value controls how frequently the audioprocess event is 
-    dispatched and how many sample-frames need to be processed each call. 
-    Lower values for buffer size will result in a lower (better) latency. 
+    /* From the spec: This value controls how frequently the audioprocess event is
+    dispatched and how many sample-frames need to be processed each call.
+    Lower values for buffer size will result in a lower (better) latency.
     Higher values will be necessary to avoid audio breakup and glitches */
     var bufferSize = 2048;
     recorder = context.createJavaScriptNode(bufferSize, 2, 2);

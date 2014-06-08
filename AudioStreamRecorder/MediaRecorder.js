@@ -27,7 +27,7 @@ function MediaRecorderWrapper(mediaStream) {
 
         mediaRecorder = new MediaRecorder(mediaStream);
         mediaRecorder.ondataavailable = function(e) {
-            console.log('ondataavailable', e.data.type, e.data);
+            console.log('ondataavailable', e.data.type, e.data.size, e.data);
             // mediaRecorder.state == 'recording' means that media recorder is associated with "session"
             // mediaRecorder.state == 'stopped' means that media recorder is detached from the "session" ... in this case; "session" will also be deleted.
 
@@ -36,15 +36,13 @@ function MediaRecorderWrapper(mediaStream) {
                 return;
             }
 
-            if (mediaRecorder.state == 'recording') {
-                // at this stage, Firefox MediaRecorder API doesn't allow to choose the output mimeType format!
-                var blob = new window.Blob([e.data], {
-                    type: e.data.type || self.mimeType || 'audio/ogg' // It specifies the container format as well as the audio and video capture formats.
-                });
+            // at this stage, Firefox MediaRecorder API doesn't allow to choose the output mimeType format!
+            var blob = new window.Blob([e.data], {
+                type: e.data.type || self.mimeType || 'audio/ogg' // It specifies the container format as well as the audio and video capture formats.
+            });
 
-                // Dispatching OnDataAvailable Handler
-                self.ondataavailable(blob);
-            }
+            // Dispatching OnDataAvailable Handler
+            self.ondataavailable(blob);
         };
 
         mediaRecorder.onstop = function(error) {
@@ -63,11 +61,11 @@ function MediaRecorderWrapper(mediaStream) {
         // http://dxr.mozilla.org/mozilla-central/source/content/media/MediaRecorder.cpp#317
 
         // Maybe "Read Thread" doesn't fire video-track read notification;
-        // that's why shutdown notification is received; and "Read Thread" is stopped. 
+        // that's why shutdown notification is received; and "Read Thread" is stopped.
 
         // https://dvcs.w3.org/hg/dap/raw-file/default/media-stream-capture/MediaRecorder.html#error-handling
         mediaRecorder.onerror = function(error) {
-            console.warn(error);
+            console.error(error);
             self.start(mTimeSlice);
         };
 
@@ -93,10 +91,7 @@ function MediaRecorderWrapper(mediaStream) {
         }
     };
 
-    this.ondataavailable = function() {
-    };
-    this.onstop = function() {
-    };
+    this.ondataavailable = this.onstop = function() { };
 
     // Reference to itself
     var self = this;

@@ -1,4 +1,4 @@
-// Last time updated at 15 Feb 2014, 16:32:23
+// Last time updated at June 08, 2014, 08:21:00
 
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.webrtc-experiment.com/licence
@@ -54,7 +54,10 @@ function MediaStreamRecorder(mediaStream) {
 // Cross-Browser Declarations
 
 // animation-frame used in WebM recording
-requestAnimationFrame = window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame;
+if(!window.requestAnimationFrame && window.mozRequestAnimationFrame) {
+    requestAnimationFrame = window.mozRequestAnimationFrame;
+}
+
 cancelAnimationFrame = window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame;
 
 // WebAudio API representer
@@ -74,4 +77,12 @@ function mergeProps(mergein, mergeto) {
         }
     }
     return mergein;
+};
+
+// "dropFirstFrame" has been added by Graham Roth
+// https://github.com/gsroth
+
+function dropFirstFrame(arr) {
+    arr.shift();
+    return arr;
 }

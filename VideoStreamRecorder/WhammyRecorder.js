@@ -6,81 +6,87 @@
 // WhammyRecorder.js
 
 function WhammyRecorder(mediaStream) {
-    // void start(optional long timeSlice)
-    // timestamp to fire "ondataavailable"
     this.start = function(timeSlice) {
         timeSlice = timeSlice || 1000;
+        
+        if (!this.width) this.width = video.offsetWidth || 320;
+        if (!this.height) this.height = video.offsetHeight || 240;
 
-        var imageWidth = this.videoWidth || 320;
-        var imageHeight = this.videoHeight || 240;
-
-        canvas.width = video.width = imageWidth;
-        canvas.height = video.height = imageHeight;
-
-        startTime = Date.now();
-
-        function drawVideoFrame(time) {
-            lastAnimationFrame = requestAnimationFrame(drawVideoFrame);
-
-            if (typeof lastFrameTime === undefined) {
-                lastFrameTime = time;
-            }
-
-            // ~10 fps
-            if (time - lastFrameTime < 90) return;
-
-            context.drawImage(video, 0, 0, imageWidth, imageHeight);
-
-            // whammy.add(canvas, time - lastFrameTime);
-            whammy.add(canvas);
-
-            // console.log('Recording...' + Math.round((Date.now() - startTime) / 1000) + 's');
-            // console.log("fps: ", 1000 / (time - lastFrameTime));
-
-            lastFrameTime = time;
+        if (!this.video) {
+            this.video = {
+                width: this.width,
+                height: this.height
+            };
         }
 
-        lastAnimationFrame = requestAnimationFrame(drawVideoFrame);
+        if (!this.canvas) {
+            this.canvas = {
+                width: this.width,
+                height: this.height
+            };
+        }
 
+        canvas.width = this.canvas.width;
+        canvas.height = this.canvas.height;
+
+        video.width = this.video.width;
+        video.height = this.video.height;
+
+        drawFrames();
+        
         (function getWebMBlob() {
-            setTimeout(function() {
-                endTime = Date.now();
-                console.log('frames captured: ' + whammy.frames.length + ' => ' +
-                    ((endTime - startTime) / 1000) + 's video');
-
+            !isStopDrawing && setTimeout(function() {
+                whammy.frames = dropFirstFrame(frames);
+                frames = [];
                 var WebM_Blob = whammy.compile();
                 self.ondataavailable(WebM_Blob);
-
-                whammy.frames = [];
-				if (lastAnimationFrame)
-					getWebMBlob();
+                getWebMBlob();
             }, timeSlice);
         })();
     };
 
+    var frames = [];
+
+    function drawFrames() {
+        if(isStopDrawing) return;
+        
+        var duration = new Date().getTime() - lastTime;
+        if (!duration) return drawFrames();
+
+        // via webrtc-experiment#206, by Jack i.e. @Seymourr
+        lastTime = new Date().getTime();
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        !isStopDrawing && frames.push({
+            duration: duration,
+            image: canvas.toDataURL('image/webp')
+        });
+
+        setTimeout(drawFrames, 10);
+    }
+
+    var isStopDrawing = false;
+
     this.stop = function() {
-        if (lastAnimationFrame) {
-            cancelAnimationFrame(lastAnimationFrame);
-			lastAnimationFrame = false;
-		}
+        isStopDrawing = true;
+        whammy.frames = dropFirstFrame(frames);
+        frames = [];
+        var WebM_Blob = whammy.compile();
+        this.ondataavailable(WebM_Blob);
     };
-
-    this.ondataavailable = function() {};
-    this.onstop = function() {};
-
-    // Reference to itself
-    var self = this;
 
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
 
     var video = document.createElement('video');
     video.muted = true;
+    video.volume = 0;
     video.autoplay = true;
     video.src = URL.createObjectURL(mediaStream);
     video.play();
 
-    var lastAnimationFrame = null;
-    var startTime, endTime, lastFrameTime;
-    var whammy = new Whammy.Video(10, 0.6);
+    var lastTime = new Date().getTime();
+
+    var whammy = new Whammy.Video();
+    var self = this;
 }

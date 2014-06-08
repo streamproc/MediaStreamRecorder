@@ -1,13 +1,15 @@
-## MediaStreamRecorder.js / [Demo](https://www.webrtc-experiment.com/MediaStreamRecorder/)
+## [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) — [Demos](https://www.webrtc-experiment.com/msr/)
 
 A cross-browser implementation to record audio/video streams:
 
 1. MediaStreamRecorder can record both audio and video in single WebM file on Firefox.
 2. MediaStreamRecorder can record audio as WAV and video as either WebM or animated gif on Chrome.
 
+MediaStreamRecorder is useful in scenarios where you're planning to submit/upload recorded blobs in realtime to the server! You can get blobs after specific time-intervals.
+
 =
 
-There is a smiliar project: [RecordRTC](https://www.webrtc-experiment.com/RecordRTC/)!
+There is a similar project: **RecordRTC**! [Demo](https://www.webrtc-experiment.com/RecordRTC/) — [Documentation](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RecordRTC)
 
 =
 
@@ -38,6 +40,14 @@ function onMediaSuccess(stream) {
 function onMediaError(e) {
     console.error('media error', e);
 }
+```
+
+=
+
+#### How to manually stop recordings?
+
+```javascript
+mediaRecorder.stop();
 ```
 
 =
@@ -109,7 +119,7 @@ function onMediaError(e) {
 
 =
 
-##### How to upload record files using PHP?
+##### How to upload recorded files using PHP?
 
 **PHP code:**
 
@@ -169,7 +179,7 @@ function xhr(url, data, callback) {
 
 =
 
-##### Demos using [MediaStreamRecorder.js](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder) library
+##### [Demos](https://www.webrtc-experiment.com/msr/) using [MediaStreamRecorder.js](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder) library
 
 | Experiment Name        | Demo           | Source Code |
 | ------------- |-------------|-------------|
@@ -178,6 +188,14 @@ function xhr(url, data, callback) {
 
 =
 
+##### Contributors
+
+1. [Muaz Khan](https://github.com/muaz-khan)
+2. [neizerth](https://github.com/neizerth)
+3. [andersaloof](https://github.com/andersaloof)
+
+=
+
 ##### License
 
-[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://www.webrtc-experiment.com/licence/) . Copyright (c) 2013 [Muaz Khan](https://github.com/muaz-khan) and [neizerth](https://github.com/neizerth).
+[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://www.webrtc-experiment.com/licence/).
