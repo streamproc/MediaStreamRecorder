@@ -1,4 +1,4 @@
-// Last time updated at June 08, 2014, 08:21:00
+// Last time updated at August 06, 2014
 
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.webrtc-experiment.com/licence
@@ -199,8 +199,8 @@ function StereoRecorder(mediaStream) {
 
         mediaRecorder.record();
 
-        timeout = setTimeout(function() {
-            mediaRecorder.stop();
+        timeout = setInterval(function() {
+            mediaRecorder.requestData();
         }, timeSlice);
     };
 
@@ -228,7 +228,7 @@ function StereoAudioRecorder(mediaStream, root) {
     // variables
     var leftchannel = [];
     var rightchannel = [];
-    var recorder;
+    var scriptprocessornode;
     var recording = false;
     var recordingLength = 0;
     var volume;
@@ -243,14 +243,28 @@ function StereoAudioRecorder(mediaStream, root) {
         leftchannel.length = rightchannel.length = 0;
         recordingLength = 0;
     };
-
-    this.stop = function() {
-        // we stop recording
-        recording = false;
-
+    
+    this.requestData = function() {
+        if(recordingLength == 0) {
+            requestDataInvoked = false;
+            return;
+        }
+        
+        requestDataInvoked = true;
+        // clone stuff
+        var internal_leftchannel = leftchannel.slice(0);
+        var internal_rightchannel = rightchannel.slice(0);
+        var internal_recordingLength = recordingLength;
+        
+        // reset the buffers for the new recording
+        leftchannel.length = rightchannel.length = [];
+        recordingLength = 0;
+        requestDataInvoked = false;
+        
         // we flat the left and right channels down
-        var leftBuffer = mergeBuffers(leftchannel, recordingLength);
-        var rightBuffer = mergeBuffers(rightchannel, recordingLength);
+        var leftBuffer = mergeBuffers(internal_leftchannel, internal_recordingLength);
+        var rightBuffer = mergeBuffers(internal_leftchannel, internal_recordingLength);
+        
         // we interleave both channels together
         var interleaved = interleave(leftBuffer, rightBuffer);
 
@@ -291,6 +305,12 @@ function StereoAudioRecorder(mediaStream, root) {
         root.ondataavailable(blob);
     };
 
+    this.stop = function() {
+        // we stop recording
+        recording = false;
+        this.requestData();
+    };
+
     function interleave(leftChannel, rightChannel) {
         var length = leftChannel.length + rightChannel.length;
         var result = new Float32Array(length);
@@ -325,37 +345,74 @@ function StereoAudioRecorder(mediaStream, root) {
     }
 
     // creates the audio context
-    audioContext = window.AudioContext || window.webkitAudioContext;
-    context = new audioContext();
+    
+    // creates the audio context
+    var audioContext = Storage.AudioContext;
+
+    if (!Storage.AudioContextConstructor)
+        Storage.AudioContextConstructor = new audioContext();
+
+    var context = Storage.AudioContextConstructor;
 
     // creates a gain node
-    volume = context.createGain();
+    if (!Storage.VolumeGainNode)
+        Storage.VolumeGainNode = context.createGain();
+
+    var volume = Storage.VolumeGainNode;
 
     // creates an audio node from the microphone incoming stream
-    audioInput = context.createMediaStreamSource(mediaStream);
+    if (!Storage.AudioInput)
+        Storage.AudioInput = context.createMediaStreamSource(mediaStream);
 
+    // creates an audio node from the microphone incoming stream
+    var audioInput = Storage.AudioInput;
+    
     // connect the stream to the gain node
     audioInput.connect(volume);
 
     /* From the spec: This value controls how frequently the audioprocess event is
     dispatched and how many sample-frames need to be processed each call.
     Lower values for buffer size will result in a lower (better) latency.
-    Higher values will be necessary to avoid audio breakup and glitches */
+    Higher values will be necessary to avoid audio breakup and glitches 
+    Legal values are 256, 512, 1024, 2048, 4096, 8192, and 16384.*/
     var bufferSize = 2048;
-    recorder = context.createJavaScriptNode(bufferSize, 2, 2);
+    if (context.createJavaScriptNode) {
+        scriptprocessornode = context.createJavaScriptNode(bufferSize, 2, 2);
+    } else if (context.createScriptProcessor) {
+        scriptprocessornode = context.createScriptProcessor(bufferSize, 2, 2);
+    } else {
+        throw 'WebAudio API has no support on this browser.';
+    }
 
-    recorder.onaudioprocess = function(e) {
-        if (!recording) return;
+    var requestDataInvoked = false;
+    
+    // sometimes "scriptprocessornode" disconnects from he destination-node
+    // and there is no exception thrown in this case.
+    // and obviously no further "ondataavailable" events will be emitted.
+    // below global-scope variable is added to debug such unexpected but "rare" cases.
+    window.scriptprocessornode = scriptprocessornode;
+    
+    // http://webaudio.github.io/web-audio-api/#the-scriptprocessornode-interface
+    scriptprocessornode.onaudioprocess = function(e) {
+        if (!recording || requestDataInvoked) return;
+        
         var left = e.inputBuffer.getChannelData(0);
         var right = e.inputBuffer.getChannelData(1);
         // we clone the samples
         leftchannel.push(new Float32Array(left));
         rightchannel.push(new Float32Array(right));
         recordingLength += bufferSize;
-    }; // we connect the recorder
-    volume.connect(recorder);
-    recorder.connect(context.destination);
+    };
+    
+    volume.connect(scriptprocessornode);
+    scriptprocessornode.connect(context.destination);
 }
+
+// __________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
+// Storage.js
+var Storage = {
+    AudioContext: window.AudioContext || window.webkitAudioContext
+};
 
 // =================
 // WhammyRecorder.js

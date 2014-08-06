@@ -9,7 +9,7 @@
 <html lang="en">
     <head>
         <title>WebRTC Audio/Video Recording using MediaStreamRecorder</title>
-        <script src="//www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+        <script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
         <style>
             input {
                 border: 1px solid rgb(46, 189, 235);
@@ -88,9 +88,6 @@
 
                     videosContainer.appendChild(a);
                     videosContainer.appendChild(document.createElement('hr'));
-                    
-                    video.src = a.href;
-                    video.play();
                 };
                 
                 var timeInterval = document.querySelector('#time-interval').value;
@@ -129,6 +126,32 @@
                 document.querySelector('#start-recording').disabled = false;
             };
         </script>
+        
+        <pre style="border-left: 2px solid red; margin-left:2em; padding-left: 1em;">
+// cdn.webrtc-experiment.com/MediaStreamRecorder.js
+
+var mediaConstraints = {
+    audio: true, // if firefox (don't use for chrome)
+    video: true  // if firefox or chrome
+};
+
+navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+
+function onMediaSuccess(stream) {
+    var mediaRecorder = new MediaStreamRecorder(stream);
+    mediaRecorder.mimeType = 'video/webm';
+    mediaRecorder.ondataavailable = function (blob) {
+        // POST/PUT "Blob" using FormData/XHR2
+        var blobURL = URL.createObjectURL(blob);
+        document.write('&lt;a href="' + blobURL + '"&gt;' + blobURL + '&lt;/a&gt;');
+    };
+    mediaRecorder.start(3000);
+}
+
+function onMediaError(e) {
+    console.error('media error', e);
+}
+</pre>
         
         <a href="https://www.webrtc-experiment.com/" style="border-bottom: 1px solid red; color: red; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">← WebRTC Experiments</a>
     </body>

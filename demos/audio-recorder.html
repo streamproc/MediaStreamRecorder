@@ -9,7 +9,7 @@
 <html lang="en">
     <head>
         <title>WebRTC Audio Recording using MediaStreamRecorder</title>
-        <script src="//www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+        <script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
         <style>
             input {
                 border: 1px solid rgb(46, 189, 235);
@@ -30,7 +30,7 @@
 		
         <div>
             <label for="time-interval">Time Interval (milliseconds):</label>
-            <input type="text" id="time-interval" value="5000">
+            <input type="text" id="time-interval" value="5000">ms
 
             <button id="start-recording">Start Recording</button>
             <button id="stop-recording" disabled>Stop Recording</button>
@@ -75,9 +75,6 @@
 
                     audiosContainer.appendChild(a);
                     audiosContainer.appendChild(document.createElement('hr'));
-                    
-                    audio.src = a.href;
-                    audio.play();
                 };
                 
                 var timeInterval = document.querySelector('#time-interval').value;
@@ -116,6 +113,30 @@
                 document.querySelector('#start-recording').disabled = false;
             };
         </script>
+        
+        <pre style="border-left: 2px solid red; margin-left:2em; padding-left: 1em;">
+// cdn.webrtc-experiment.com/MediaStreamRecorder.js
+var mediaConstraints = {
+    audio: true
+};
+
+navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+
+function onMediaSuccess(stream) {
+    var mediaRecorder = new MediaStreamRecorder(stream);
+    mediaRecorder.mimeType = 'audio/ogg';
+    mediaRecorder.ondataavailable = function (blob) {
+        // POST/PUT "Blob" using FormData/XHR2
+        var blobURL = URL.createObjectURL(blob);
+        document.write('&lt;a href="' + blobURL + '"&gt;' + blobURL + '&lt;/a&gt;');
+    };
+    mediaRecorder.start(3000);
+}
+
+function onMediaError(e) {
+    console.error('media error', e);
+}
+</pre>
         
         <a href="https://www.webrtc-experiment.com/" style="border-bottom: 1px solid red; color: red; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">← WebRTC Experiments</a>
     </body>

@@ -1,4 +1,4 @@
-## [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) — [Demos](https://www.webrtc-experiment.com/msr/)
+## [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) - [Demos](https://www.webrtc-experiment.com/msr/)
 
 A cross-browser implementation to record audio/video streams:
 
@@ -9,14 +9,23 @@ MediaStreamRecorder is useful in scenarios where you're planning to submit/uploa
 
 =
 
-There is a similar project: **RecordRTC**! [Demo](https://www.webrtc-experiment.com/RecordRTC/) — [Documentation](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RecordRTC)
+##### [Demos](https://www.webrtc-experiment.com/msr/) using [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library
+
+| Experiment Name        | Demo           | Source Code |
+| ------------- |-------------|-------------|
+| **Audio Recording** | [Demo](https://www.webrtc-experiment.com/msr/audio-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/audio-recorder.html) |
+| **Video/Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/video-recorder.html) |
+
+=
+
+There is a similar project: **RecordRTC**! [Demo](https://www.webrtc-experiment.com/RecordRTC/) - [Documentation](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RecordRTC)
 
 =
 
 #### Record audio+video on Firefox in single WebM
 
 ```html
-<script src="//www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+<script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 ```
 
 ```javascript
@@ -25,7 +34,7 @@ var mediaConstraints = {
     video: true  // don't forget video!
 };
 
-navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
@@ -52,10 +61,10 @@ mediaRecorder.stop();
 
 =
 
-#### Record only audio on chrome
+#### Record only audio on Chrome/Firefox
 
 ```html
-<script src="//www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+<script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 ```
 
 ```javascript
@@ -63,7 +72,7 @@ var mediaConstraints = {
     audio: true
 };
 
-navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
@@ -85,7 +94,7 @@ function onMediaError(e) {
 #### Record video/gif on chrome
 
 ```html
-<script src="//www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+<script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 ```
 
 ```javascript
@@ -93,7 +102,7 @@ var mediaConstraints = {
     video: true
 };
 
-navigator.mozGetUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
@@ -175,16 +184,8 @@ function xhr(url, data, callback) {
 | ------------- |-------------|
 | Firefox | [Stable](http://www.mozilla.org/en-US/firefox/new/) / [Aurora](http://www.mozilla.org/en-US/firefox/aurora/) / [Nightly](http://nightly.mozilla.org/) |
 | Google Chrome | [Stable](https://www.google.com/intl/en_uk/chrome/browser/) / [Canary](https://www.google.com/intl/en/chrome/browser/canary.html) / [Beta](https://www.google.com/intl/en/chrome/browser/beta.html) / [Dev](https://www.google.com/intl/en/chrome/browser/index.html?extra=devchannel#eula) |
-| Android | [Chrome Beta](https://play.google.com/store/apps/details?id=com.chrome.beta&hl=en) |
-
-=
-
-##### [Demos](https://www.webrtc-experiment.com/msr/) using [MediaStreamRecorder.js](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder) library
-
-| Experiment Name        | Demo           | Source Code |
-| ------------- |-------------|-------------|
-| **Audio Recording** | [Demo](https://www.webrtc-experiment.com/msr/audio-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/audio-recorder.html) |
-| **Video/Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/video-recorder.html) |
+| Opera | [Stable](http://www.opera.com/) / [NEXT](http://www.opera.com/computer/next)  |
+| Android | [Chrome](https://play.google.com/store/apps/details?id=com.chrome.beta&hl=en) / [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox) / [Opera](https://play.google.com/store/apps/details?id=com.opera.browser) |
 
 =
 

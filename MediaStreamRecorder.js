@@ -1,5 +1,3 @@
-// Last time updated at June 08, 2014, 08:21:00
-
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.webrtc-experiment.com/licence
 // Documentation - github.com/streamproc/MediaStreamRecorder
