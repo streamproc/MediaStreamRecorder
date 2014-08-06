@@ -13,8 +13,8 @@ MediaStreamRecorder is useful in scenarios where you're planning to submit/uploa
 
 | Experiment Name        | Demo           | Source Code |
 | ------------- |-------------|-------------|
-| **Audio Recording** | [Demo](https://www.webrtc-experiment.com/msr/audio-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/audio-recorder.html) |
-| **Video/Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MediaStreamRecorder/demos/video-recorder.html) |
+| **Audio Recording** | [Demo](https://www.webrtc-experiment.com/msr/audio-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/audio-recorder.html) |
+| **Video/Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/video-recorder.html) |
 
 =
 
