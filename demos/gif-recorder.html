@@ -3,12 +3,12 @@
 > MIT License   - https://www.webrtc-experiment.com/licence/
 > Documentation - https://github.com/streamproc/MediaStreamRecorder
 > =================================================================
-> audio-recorder.html
+> gif-recorder.html
 -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>WebRTC Audio Recording using MediaStreamRecorder</title>
+        <title>WebRTC Gif Recording using MediaStreamRecorder</title>
         
         <!--
             data-scripts-dir:   ../
@@ -16,7 +16,7 @@
         -->
         <script 
             src="https://cdn.webrtc-experiment.com/MediaStreamRecorder-v1.2.js" 
-            data-require="StereoRecorder,MediaRecorder"
+            data-require="GifRecorder"
             data-scripts-dir="https://cdn.webrtc-experiment.com/msr/">
         </script>
         
@@ -34,21 +34,27 @@
     </head>
     <body>
         <h1>
-            <a href="https://www.webrtc-experiment.com/">WebRTC</a> Audio Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
+            <a href="https://www.webrtc-experiment.com/">WebRTC</a> Gif Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
                                      target="_blank">MediaStreamRecorder</a>
         </h1>
 		
         <div>
             <label for="time-interval">Time Interval (milliseconds):</label>
-            <input type="text" id="time-interval" value="5000">ms
-
+            <input type="text" id="time-interval" value="5000">
+            
+            <label for="video-width">Video Width:</label>
+            <input type="text" id="video-width" value="320">
+            
+            <label for="video-height">Video Height:</label>
+            <input type="text" id="video-height" value="240">
+            
             <button id="start-recording">Start Recording</button>
             <button id="stop-recording" disabled>Stop Recording</button>
         </div>
-        <div id="audios-container">
+        <div id="videos-container">
         </div>
         <script>
-            var mediaConstraints = { audio: true };
+            var mediaConstraints = { video: true };
             
             document.querySelector('#start-recording').onclick = function() {
                 this.disabled = true;
@@ -63,28 +69,35 @@
             var mediaRecorder;
 
             function onMediaSuccess(stream) {
-                var audio = document.createElement('audio');
-                
-                audio = mergeProps(audio, {
+                var video = document.createElement('video');
+
+                var videoWidth = document.getElementById('video-width').value || 320;
+                var videoHeight = document.getElementById('video-height').value || 240;
+
+                video = mergeProps(video, {
                     controls: true,
+                    width: videoWidth,
+                    height: videoHeight,
                     src: URL.createObjectURL(stream)
                 });
-                audio.play();
+                video.play();
 
-                audiosContainer.appendChild(audio);
-                audiosContainer.appendChild(document.createElement('hr'));
+                videosContainer.appendChild(video);
+                videosContainer.appendChild(document.createElement('hr'));
 
                 mediaRecorder = new MediaStreamRecorder(stream);
-                mediaRecorder.mimeType = 'audio/ogg';
+                mediaRecorder.mimeType = 'image/gif'; // this line is mandatory
+                mediaRecorder.videoWidth  = videoWidth;
+                mediaRecorder.videoHeight = videoHeight;
                 mediaRecorder.ondataavailable = function(blob) {
                     var a = document.createElement('a');
                     a.target = '_blank';
-                    a.innerHTML = 'Open Recorded Audio No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
+                    a.innerHTML = 'Open Recorded GIF No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
 
                     a.href = URL.createObjectURL(blob);
 
-                    audiosContainer.appendChild(a);
-                    audiosContainer.appendChild(document.createElement('hr'));
+                    videosContainer.appendChild(a);
+                    videosContainer.appendChild(document.createElement('hr'));
                 };
                 
                 var timeInterval = document.querySelector('#time-interval').value;
@@ -101,7 +114,7 @@
                 console.error('media error', e);
             }
 
-            var audiosContainer = document.getElementById('audios-container');
+            var videosContainer = document.getElementById('videos-container');
             var index = 1;
             
             // below function via: http://goo.gl/B3ae8c
@@ -126,15 +139,16 @@
         
         <pre style="border-left: 2px solid red; margin-left:2em; padding-left: 1em;">
 // cdn.webrtc-experiment.com/MediaStreamRecorder.js
+
 var mediaConstraints = {
-    audio: true
+    video: true
 };
 
 navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
-    mediaRecorder.mimeType = 'audio/ogg';
+    mediaRecorder.mimeType = 'image/gif';
     mediaRecorder.ondataavailable = function (blob) {
         // POST/PUT "Blob" using FormData/XHR2
         var blobURL = URL.createObjectURL(blob);

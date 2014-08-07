@@ -8,8 +8,18 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>WebRTC Audio/Video Recording using MediaStreamRecorder</title>
-        <script src="//cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+        <title>WebRTC Video Recording using MediaStreamRecorder</title>
+        
+        <!--
+            data-scripts-dir:    ../
+            src:                 ../MediaStreamRecorder-v1.2.js
+        -->
+        <script 
+            src="https://cdn.webrtc-experiment.com/MediaStreamRecorder-v1.2.js" 
+            data-require="WhammyRecorder,MediaRecorder"
+            data-scripts-dir="https://cdn.webrtc-experiment.com/msr/">
+        </script>
+        
         <style>
             input {
                 border: 1px solid rgb(46, 189, 235);
@@ -24,7 +34,7 @@
     </head>
     <body>
         <h1>
-            Video Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
+            <a href="https://www.webrtc-experiment.com/">WebRTC</a> Video Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
                                      target="_blank">MediaStreamRecorder</a>
         </h1>
 		
@@ -131,7 +141,7 @@
 // cdn.webrtc-experiment.com/MediaStreamRecorder.js
 
 var mediaConstraints = {
-    audio: true, // if firefox (don't use for chrome)
+    audio: !!navigator.mozGetUserMedia, // if firefox (don't use for chrome)
     video: true  // if firefox or chrome
 };
 
