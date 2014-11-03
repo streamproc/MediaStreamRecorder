@@ -23,7 +23,7 @@ function MediaStreamRecorder(mediaStream) {
         // video recorder (in GIF format)
         if (this.mimeType === 'image/gif') Recorder = window.GifRecorder;
 
-        mediaRecorder = new Recorder(mediaStream);
+        mediaRecorder = new Recorder(mediaStream, this.type);
         mediaRecorder.ondataavailable = this.ondataavailable;
         mediaRecorder.onstop = this.onstop;
 
@@ -140,11 +140,11 @@ var ObjectStore = {
 * Also extract the encoded data and create blobs on every timeslice passed from start function or RequestData function called by UA.
 */
 
-function MediaRecorderWrapper(mediaStream) {
+function MediaRecorderWrapper(mediaStream, type) {
     // if user chosen only audio option; and he tried to pass MediaStream with
     // both audio and video tracks;
     // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
-    if (this.type == 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
+    if (type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
         var context = new AudioContext();
         var mediaStreamSource = context.createMediaStreamSource(mediaStream);
 
