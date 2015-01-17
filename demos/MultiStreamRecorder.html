@@ -3,12 +3,12 @@
 > MIT License   - https://www.webrtc-experiment.com/licence/
 > Documentation - https://github.com/streamproc/MediaStreamRecorder
 > =================================================================
-> video-recorder.html
+> audio-recorder.html
 -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>WebRTC Video Recording using MediaStreamRecorder</title>
+        <title>MultiStreamRecorder.js & MediaStreamRecorder</title>
         
         <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"></script>
         
@@ -26,27 +26,25 @@
     </head>
     <body>
         <h1>
-            <a href="https://www.webrtc-experiment.com/">WebRTC</a> Video Recording using <a href="https://github.com/streamproc/MediaStreamRecorder"
-                                     target="_blank">MediaStreamRecorder</a>
+            MultiStreamRecorder.js & <a href="https://github.com/streamproc/MediaStreamRecorder">MediaStreamRecorder</a>
         </h1>
+        
+        <p>
+            Getting both audio/video blobs in single "ondataavailable" event using <a href="https://github.com/streamproc/MediaStreamRecorder">MediaStreamRecorder</a>
+        </p>
 		
         <div>
             <label for="time-interval">Time Interval (milliseconds):</label>
-            <input type="text" id="time-interval" value="5000">
-            
-            <label for="video-width">Video Width:</label>
-            <input type="text" id="video-width" value="320">
-            
-            <label for="video-height">Video Height:</label>
-            <input type="text" id="video-height" value="240">
-            
+            <input type="text" id="time-interval" value="5000">ms
+
             <button id="start-recording">Start Recording</button>
             <button id="stop-recording" disabled>Stop Recording</button>
         </div>
-        <div id="videos-container">
-        </div>
+        
+        <div id="container"></div>
+        
         <script>
-            var mediaConstraints = { audio: !!navigator.mozGetUserMedia, video: true };
+            var mediaConstraints = { audio: true, video: true };
             
             document.querySelector('#start-recording').onclick = function() {
                 this.disabled = true;
@@ -55,49 +53,51 @@
             
             document.querySelector('#stop-recording').onclick = function() {
                 this.disabled = true;
-                mediaRecorder.stop();
+                multiStreamRecorder.stop();
             };
             
-            var mediaRecorder;
+            var multiStreamRecorder;
+            
+            var audioVideoBlobs = {};
+            var recordingInterval = 0;
 
             function onMediaSuccess(stream) {
                 var video = document.createElement('video');
-
-                var videoWidth = document.getElementById('video-width').value || 320;
-                var videoHeight = document.getElementById('video-height').value || 240;
-
+                
                 video = mergeProps(video, {
                     controls: true,
-                    width: videoWidth,
-                    height: videoHeight,
                     src: URL.createObjectURL(stream)
                 });
+                video.style.width = '30%';
                 video.play();
 
-                videosContainer.appendChild(video);
-                videosContainer.appendChild(document.createElement('hr'));
+                container.appendChild(video);
+                container.appendChild(document.createElement('hr'));
 
-                mediaRecorder = new MediaStreamRecorder(stream);
-                mediaRecorder.mimeType = 'video/webm'; // this line is mandatory
-                mediaRecorder.videoWidth  = videoWidth;
-                mediaRecorder.videoHeight = videoHeight;
-                mediaRecorder.ondataavailable = function(blob) {
+                multiStreamRecorder = new MultiStreamRecorder(stream);
+                
+                multiStreamRecorder.ondataavailable = function(blobs) {
+                    appendLink(blobs.audio);
+                    appendLink(blobs.video);
+                };
+                
+                function appendLink(blob) {
                     var a = document.createElement('a');
                     a.target = '_blank';
-                    a.innerHTML = 'Open Recorded Video No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
+                    a.innerHTML = 'Open Recorded ' + (blob.type == 'audio/ogg' ? 'Audio' : 'Video') + ' No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
 
                     a.href = URL.createObjectURL(blob);
 
-                    videosContainer.appendChild(a);
-                    videosContainer.appendChild(document.createElement('hr'));
-                };
+                    container.appendChild(a);
+                    container.appendChild(document.createElement('hr'));
+                }
                 
                 var timeInterval = document.querySelector('#time-interval').value;
                 if(timeInterval) timeInterval = parseInt(timeInterval);
                 else timeInterval = 5 * 1000;
 
                 // get blob after specific time interval
-                mediaRecorder.start(timeInterval);
+                multiStreamRecorder.start(timeInterval);
                 
                 document.querySelector('#stop-recording').disabled = false;
             }
@@ -106,7 +106,7 @@
                 console.error('media error', e);
             }
 
-            var videosContainer = document.getElementById('videos-container');
+            var container = document.getElementById('container');
             var index = 1;
             
             // below function via: http://goo.gl/B3ae8c
@@ -131,23 +131,20 @@
         
         <pre style="border-left: 2px solid red; margin-left:2em; padding-left: 1em;">
 // cdn.webrtc-experiment.com/MediaStreamRecorder.js
-
 var mediaConstraints = {
-    audio: !!navigator.mozGetUserMedia, // if firefox (don't use for chrome)
-    video: true  // if firefox or chrome
+    audio: true,
+    video: true
 };
 
 navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
-    var mediaRecorder = new MediaStreamRecorder(stream);
-    mediaRecorder.mimeType = 'video/webm';
-    mediaRecorder.ondataavailable = function (blob) {
-        // POST/PUT "Blob" using FormData/XHR2
-        var blobURL = URL.createObjectURL(blob);
-        document.write('&lt;a href="' + blobURL + '"&gt;' + blobURL + '&lt;/a&gt;');
+    var multiStreamRecorder = new MultiStreamRecorder(stream);
+    multiStreamRecorder.ondataavailable = function(blobs) {
+        // blobs.audio
+        // blobs.video
     };
-    mediaRecorder.start(3000);
+    multiStreamRecorder.start(3000);
 }
 
 function onMediaError(e) {

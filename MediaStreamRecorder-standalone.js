@@ -23,7 +23,7 @@ function MediaStreamRecorder(mediaStream) {
         // video recorder (in GIF format)
         if (this.mimeType === 'image/gif') Recorder = window.GifRecorder;
 
-        mediaRecorder = new Recorder(mediaStream, this.type);
+        mediaRecorder = new Recorder(mediaStream);
         mediaRecorder.ondataavailable = this.ondataavailable;
         mediaRecorder.onstop = this.onstop;
 
@@ -140,11 +140,11 @@ var ObjectStore = {
 * Also extract the encoded data and create blobs on every timeslice passed from start function or RequestData function called by UA.
 */
 
-function MediaRecorderWrapper(mediaStream, type) {
+function MediaRecorderWrapper(mediaStream) {
     // if user chosen only audio option; and he tried to pass MediaStream with
     // both audio and video tracks;
     // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
-    if (type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
+    if (this.type == 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
         var context = new AudioContext();
         var mediaStreamSource = context.createMediaStreamSource(mediaStream);
 
@@ -1116,4 +1116,92 @@ function GifRecorder(mediaStream) {
 
     var gifEncoder;
     var timeout;
+}
+
+// ______________________
+// MultiStreamRecorder.js
+
+function MultiStreamRecorder(mediaStream) {
+    if (!mediaStream) throw 'MediaStream is mandatory.';
+
+    var self = this;
+    var isFirefox = !!navigator.mozGetUserMedia;
+
+    // void start(optional long timeSlice)
+    // timestamp to fire "ondataavailable"
+    this.start = function(timeSlice) {
+        audioRecorder = new MediaStreamRecorder(mediaStream);
+        videoRecorder = new MediaStreamRecorder(mediaStream);
+
+        audioRecorder.mimeType = 'audio/ogg';
+        videoRecorder.mimeType = 'video/webm';
+
+        audioRecorder.ondataavailable = function(blob) {
+            if (!audioVideoBlobs[recordingInterval]) {
+                audioVideoBlobs[recordingInterval] = {};
+            }
+
+            audioVideoBlobs[recordingInterval].audio = blob;
+
+            if (audioVideoBlobs[recordingInterval].video && !audioVideoBlobs[recordingInterval].posted) {
+                audioVideoBlobs[recordingInterval].posted = true;
+                postToServer(audioVideoBlobs[recordingInterval]);
+            }
+        };
+
+        videoRecorder.ondataavailable = function(blob) {
+            if (isFirefox) {
+                return self.ondataavailable({
+                    video: blob,
+                    audio: blob
+                });
+            }
+
+            if (!audioVideoBlobs[recordingInterval]) {
+                audioVideoBlobs[recordingInterval] = {};
+            }
+
+            audioVideoBlobs[recordingInterval].video = blob;
+
+            if (audioVideoBlobs[recordingInterval].audio && !audioVideoBlobs[recordingInterval].posted) {
+                audioVideoBlobs[recordingInterval].posted = true;
+                postToServer(audioVideoBlobs[recordingInterval]);
+            }
+        };
+
+        function postToServer(blobs) {
+            recordingInterval++;
+
+            self.ondataavailable(blobs);
+        }
+
+        videoRecorder.onstop = audioRecorder.onstop = function(error) {
+            self.onstop(error);
+        };
+
+        if (!isFirefox) {
+            audioRecorder.start(timeSlice);
+        }
+
+        videoRecorder.start(timeSlice);
+    };
+
+    this.stop = function() {
+        if (audioRecorder) audioRecorder.stop();
+        if (videoRecorder) videoRecorder.stop();
+    };
+
+    this.ondataavailable = function(blob) {
+        console.log('ondataavailable..', blob);
+    };
+
+    this.onstop = function(error) {
+        console.warn('stopped..', error);
+    };
+
+    var audioRecorder;
+    var videoRecorder;
+
+    var audioVideoBlobs = {};
+    var recordingInterval = 0;
 }
