@@ -3,8 +3,8 @@
 
 function WhammyRecorderHelper(mediaStream, root) {
     this.record = function(timeSlice) {
-        if (!this.width) this.width = video.offsetWidth || 320;
-        if (!this.height) this.height = video.offsetHeight || 240;
+        if (!this.width) this.width = video.videoWidth || 320;
+        if (!this.height) this.height = video.videoHeight || 240;
 
         if (!this.video) {
             this.video = {
