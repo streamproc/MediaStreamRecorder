@@ -89,12 +89,11 @@ navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var multiStreamRecorder = new MultiStreamRecorder(stream);
-    multiStreamRecorder.mimeType = 'video/webm';
     multiStreamRecorder.ondataavailable = function (blobs) {
         // blobs.audio
         // blobs.video
     };
-    multiStreamRecorder.start(3000);
+    multiStreamRecorder.start(3 * 1000);
 }
 
 function onMediaError(e) {

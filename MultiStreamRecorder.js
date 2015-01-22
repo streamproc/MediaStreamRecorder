@@ -11,6 +11,8 @@ function MultiStreamRecorder(mediaStream) {
     var self = this;
     var isFirefox = !!navigator.mozGetUserMedia;
 
+    this.stream = mediaStream;
+
     // void start(optional long timeSlice)
     // timestamp to fire "ondataavailable"
     this.start = function(timeSlice) {
@@ -19,6 +21,12 @@ function MultiStreamRecorder(mediaStream) {
 
         audioRecorder.mimeType = 'audio/ogg';
         videoRecorder.mimeType = 'video/webm';
+
+        for (var prop in this) {
+            if (typeof this[prop] !== 'function') {
+                audioRecorder[prop] = videoRecorder[prop] = this[prop];
+            }
+        }
 
         audioRecorder.ondataavailable = function(blob) {
             if (!audioVideoBlobs[recordingInterval]) {

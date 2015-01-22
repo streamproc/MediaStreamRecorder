@@ -32,7 +32,7 @@ data-require="StereoAudioRecorder,WhammyRecorder,MultiStreamRecorder"
 data-require="GifRecorder"
 
 // to record everything
-data-require="StereoRecorder,MediaRecorder,WhammyRecorder,GifRecorder"
+data-require="StereoRecorder,MediaRecorder,WhammyRecorder,GifRecorder,MultiStreamRecorder"
 ```
 
 `data-scripts-dir="/"`: Location of the directory where all required script files resides.

@@ -9,6 +9,18 @@
 <html lang="en">
     <head>
         <title>MultiStreamRecorder.js & MediaStreamRecorder</title>
+
+        <!--
+        <script 
+            src="../MediaStreamRecorder-v1.2.js"
+            data-scripts-dir="/MediaStreamRecorder/"
+            data-require="StereoRecorder,MediaRecorder,WhammyRecorder,GifRecorder,MultiStreamRecorder"
+        ></script>
+        -->
+        
+        <!--
+        <script src="../MediaStreamRecorder-standalone.js"></script>
+        -->
         
         <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"></script>
         
@@ -44,7 +56,29 @@
         <div id="container"></div>
         
         <script>
-            var mediaConstraints = { audio: true, video: true };
+            // commonly allowed resolutions:
+            // ['1920:1080', 
+            // '1280:720', 
+            // '960:720', 
+            // '640:360', 
+            // '640:480', 
+            // '320:240', 
+            // '320:180']
+            var resolution_x = 1280;
+            var resolution_y = 720;
+            
+            var mediaConstraints = { 
+                audio: true, 
+                video: {
+                    mandatory: {
+                        maxWidth: resolution_x,
+                        maxHeight: resolution_y,
+                        //minFrameRate: 3,
+                        //maxFrameRate: 64,
+                        //minAspectRatio: 1.77
+                    }
+                }
+            };
             
             document.querySelector('#start-recording').onclick = function() {
                 this.disabled = true;
@@ -54,6 +88,10 @@
             document.querySelector('#stop-recording').onclick = function() {
                 this.disabled = true;
                 multiStreamRecorder.stop();
+                
+                if(multiStreamRecorder.stream) {
+                    multiStreamRecorder.stream.stop();
+                }
             };
             
             var multiStreamRecorder;
@@ -68,38 +106,53 @@
                     controls: true,
                     src: URL.createObjectURL(stream)
                 });
-                video.style.width = '30%';
-                video.play();
+                
+                video.width = resolution_x;
+                video.height = resolution_y;
+                
+                video.addEventListener('loadedmetadata', function() {
+                    multiStreamRecorder = new MultiStreamRecorder(stream);
+                    
+                    // below line is optional
+                    // because we already set "video.width"
+                    // and "video.height"....5 lines above
+                    multiStreamRecorder.canvas = {
+                        width: video.width,
+                        height: video.height
+                    };
+                    
+                    multiStreamRecorder.video = video;
+                    
+                    multiStreamRecorder.ondataavailable = function(blobs) {
+                        appendLink(blobs.audio);
+                        appendLink(blobs.video);
+                    };
+                    
+                    function appendLink(blob) {
+                        var a = document.createElement('a');
+                        a.target = '_blank';
+                        a.innerHTML = 'Open Recorded ' + (blob.type == 'audio/ogg' ? 'Audio' : 'Video') + ' No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
 
+                        a.href = URL.createObjectURL(blob);
+
+                        container.appendChild(a);
+                        container.appendChild(document.createElement('hr'));
+                    }
+                    
+                    var timeInterval = document.querySelector('#time-interval').value;
+                    if(timeInterval) timeInterval = parseInt(timeInterval);
+                    else timeInterval = 5 * 1000;
+
+                    // get blob after specific time interval
+                    multiStreamRecorder.start(timeInterval);
+                    
+                    document.querySelector('#stop-recording').disabled = false;
+                }, false);
+                
+                video.play();
+                
                 container.appendChild(video);
                 container.appendChild(document.createElement('hr'));
-
-                multiStreamRecorder = new MultiStreamRecorder(stream);
-                
-                multiStreamRecorder.ondataavailable = function(blobs) {
-                    appendLink(blobs.audio);
-                    appendLink(blobs.video);
-                };
-                
-                function appendLink(blob) {
-                    var a = document.createElement('a');
-                    a.target = '_blank';
-                    a.innerHTML = 'Open Recorded ' + (blob.type == 'audio/ogg' ? 'Audio' : 'Video') + ' No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
-
-                    a.href = URL.createObjectURL(blob);
-
-                    container.appendChild(a);
-                    container.appendChild(document.createElement('hr'));
-                }
-                
-                var timeInterval = document.querySelector('#time-interval').value;
-                if(timeInterval) timeInterval = parseInt(timeInterval);
-                else timeInterval = 5 * 1000;
-
-                // get blob after specific time interval
-                multiStreamRecorder.start(timeInterval);
-                
-                document.querySelector('#stop-recording').disabled = false;
             }
 
             function onMediaError(e) {
