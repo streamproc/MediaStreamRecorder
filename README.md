@@ -149,8 +149,8 @@ function onMediaSuccess(stream) {
     // for gif recording
     // mediaRecorder.mimeType = 'image/gif';
 	
-    mediaRecorder.videoWidth = 320;
-    mediaRecorder.videoHeight = 240;
+    mediaRecorder.width = 320;
+    mediaRecorder.height = 240;
 	
     mediaRecorder.ondataavailable = function (blob) {
         // POST/PUT "Blob" using FormData/XHR2
