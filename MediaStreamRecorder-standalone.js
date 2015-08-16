@@ -391,6 +391,9 @@ function StereoAudioRecorder(mediaStream, root) {
         // we stop recording
         recording = false;
         this.requestData();
+
+        audioInput.disconnect();
+        ObjectStore.AudioContextConstructor = null;
     };
 
     function interleave(leftChannel, rightChannel) {
@@ -437,14 +440,12 @@ function StereoAudioRecorder(mediaStream, root) {
     var context = ObjectStore.AudioContextConstructor;
 
     // creates a gain node
-    if (!ObjectStore.VolumeGainNode)
-        ObjectStore.VolumeGainNode = context.createGain();
+    ObjectStore.VolumeGainNode = context.createGain();
 
     var volume = ObjectStore.VolumeGainNode;
 
     // creates an audio node from the microphone incoming stream
-    if (!ObjectStore.AudioInput)
-        ObjectStore.AudioInput = context.createMediaStreamSource(mediaStream);
+    ObjectStore.AudioInput = context.createMediaStreamSource(mediaStream);
 
     // creates an audio node from the microphone incoming stream
     var audioInput = ObjectStore.AudioInput;
