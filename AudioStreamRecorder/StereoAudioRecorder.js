@@ -4,7 +4,15 @@
 // source code from: http://typedarray.org/wp-content/projects/WebAudioRecorder/script.js
 
 function StereoAudioRecorder(mediaStream, root) {
-    // variables
+
+    // variables    
+    var deviceSampleRate = 44100; // range: 22050 to 96000
+    
+    // check device sample rate
+    if(window.AudioContext){
+        deviceSampleRate = (new window.AudioContext()).sampleRate;
+    }
+
     var leftchannel = [];
     var rightchannel = [];
     var scriptprocessornode;
@@ -12,7 +20,7 @@ function StereoAudioRecorder(mediaStream, root) {
     var recordingLength = 0;
     var volume;
     var audioInput;
-    var sampleRate = root.sampleRate || 44100; // range: 22050 to 96000
+    var sampleRate = root.sampleRate || deviceSampleRate;
     var audioContext;
     var context;
 
