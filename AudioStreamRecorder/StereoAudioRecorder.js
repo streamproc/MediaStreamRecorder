@@ -108,7 +108,6 @@ function StereoAudioRecorder(mediaStream, root) {
         this.requestData();
 
         audioInput.disconnect();
-        ObjectStore.AudioContextConstructor = null;
     };
 
     function interleave(leftChannel, rightChannel) {
