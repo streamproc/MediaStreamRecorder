@@ -1,5 +1,3 @@
-// Last time updated at September 19, 2015
-
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
 // https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js
@@ -9,6 +7,9 @@
 // updates?
 /*
 -. this.recorderType = StereoAudioRecorder;
+-. this.bitsPerSeconds = 128000;
+-. this.quality = 10;
+-. this.speed = 100;
 */
 
 //------------------------------------

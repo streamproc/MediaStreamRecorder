@@ -1,27 +1,33 @@
 // _____________________________
 // Cross-Browser-Declarations.js
 
+if (typeof window === 'undefined') {
+    /*jshint -W020 */
+    window = {};
+}
+
 // WebAudio API representer
-if (typeof AudioContext !== 'undefined') {
+var AudioContext = window.AudioContext;
+
+if (typeof AudioContext === 'undefined') {
     if (typeof webkitAudioContext !== 'undefined') {
-        /*global AudioContext:true*/
-        var AudioContext = webkitAudioContext;
+        /*global AudioContext:true */
+        AudioContext = webkitAudioContext;
     }
 
     if (typeof mozAudioContext !== 'undefined') {
-        /*global AudioContext:true*/
-        var AudioContext = mozAudioContext;
+        /*global AudioContext:true */
+        AudioContext = mozAudioContext;
     }
 }
 
-if (typeof URL !== 'undefined' && typeof webkitURL !== 'undefined') {
-    /*global URL:true*/
-    var URL = webkitURL;
-}
+/*jshint -W079 */
+var URL = window.URL;
 
-var IsEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
-var IsOpera = !!window.opera || navigator.userAgent.indexOf('OPR/') !== -1;
-var IsChrome = !IsEdge && !IsEdge && !!navigator.webkitGetUserMedia;
+if (typeof URL === 'undefined' && typeof webkitURL !== 'undefined') {
+    /*global URL:true */
+    URL = webkitURL;
+}
 
 if (typeof navigator !== 'undefined') {
     if (typeof navigator.webkitGetUserMedia !== 'undefined') {
@@ -38,8 +44,31 @@ if (typeof navigator !== 'undefined') {
     };
 }
 
-if (typeof webkitMediaStream !== 'undefined') {
-    var MediaStream = webkitMediaStream;
+var IsEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
+
+var IsOpera = false;
+if (typeof opera !== 'undefined' && navigator.userAgent && navigator.userAgent.indexOf('OPR/') !== -1) {
+    IsOpera = true;
+}
+var IsChrome = !IsEdge && !IsEdge && !!navigator.webkitGetUserMedia;
+
+var MediaStream = window.MediaStream;
+
+if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+    MediaStream = webkitMediaStream;
+}
+
+/*global MediaStream:true */
+if (!('stop' in MediaStream.prototype)) {
+    MediaStream.prototype.stop = function() {
+        this.getAudioTracks().forEach(function(track) {
+            track.stop();
+        });
+
+        this.getVideoTracks().forEach(function(track) {
+            track.stop();
+        });
+    };
 }
 
 // Merge all other data-types except "function"
@@ -139,5 +168,5 @@ function bytesToSize(bytes) {
 // ______________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
 // ObjectStore.js
 var ObjectStore = {
-    AudioContext: window.AudioContext || window.webkitAudioContext
+    AudioContext: AudioContext
 };

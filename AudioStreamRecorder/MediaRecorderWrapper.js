@@ -13,19 +13,6 @@
  */
 
 function MediaRecorderWrapper(mediaStream) {
-    // if user chosen only audio option; and he tried to pass MediaStream with
-    // both audio and video tracks;
-    // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
-    if (this.type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
-        var context = new AudioContext();
-        var mediaStreamSource = context.createMediaStreamSource(mediaStream);
-
-        var destination = context.createMediaStreamDestination();
-        mediaStreamSource.connect(destination);
-
-        mediaStream = destination.stream;
-    }
-
     // void start(optional long timeSlice)
     // timestamp to fire "ondataavailable"
 
@@ -34,6 +21,14 @@ function MediaRecorderWrapper(mediaStream) {
     this.start = function(mTimeSlice) {
         mTimeSlice = mTimeSlice || 1000;
         isStopRecording = false;
+
+        if (!self.mimeType) {
+            self.mimeType = 'video/webm';
+        }
+
+        if (!self.bitsPerSecond) {
+            self.bitsPerSecond = 12800;
+        }
 
         function startRecording() {
             if (isStopRecording) {
@@ -45,10 +40,44 @@ function MediaRecorderWrapper(mediaStream) {
                 return;
             }
 
-            mediaRecorder = new MediaRecorder(mediaStream);
+            // if user chosen only audio option; and he tried to pass MediaStream with
+            // both audio and video tracks;
+            // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
+            if (!IsChrome && self.type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
+                var context = new AudioContext();
+                var mediaStreamSource = context.createMediaStreamSource(mediaStream);
+
+                var destination = context.createMediaStreamDestination();
+                mediaStreamSource.connect(destination);
+
+                mediaStream = destination.stream;
+
+                if (!self.mimeType || self.mimeType.indexOf('audio') === -1) {
+                    self.mimeType = 'audio/ogg';
+                }
+            }
+
+            var recorderHints = {
+                mimeType: self.mimeType,
+                bitsPerSecond: self.bitsPerSecond
+            };
+
+            if (IsChrome) {
+                if (!recorderHints || typeof recorderHints !== 'string') {
+                    recorderHints = 'video/vp8';
+
+                    // chrome currently supports only video recording
+                    mediaStream = new MediaStream(mediaStream.getVideoTracks());
+                }
+            }
+
+            mediaRecorder = new MediaRecorder(mediaStream, recorderHints);
 
             mediaRecorder.ondataavailable = function(e) {
-                console.log('ondataavailable', e.data.type, e.data.size, e.data);
+                if (IsChrome && e.data && !('size' in e.data)) {
+                    e.data.size = e.data.length || e.data.byteLength || 0;
+                }
+
                 // mediaRecorder.state === 'recording' means that media recorder is associated with "session"
                 // mediaRecorder.state === 'stopped' means that media recorder is detached from the "session" ... in this case; "session" will also be deleted.
 

@@ -1,4 +1,4 @@
-// Last time updated at September 19, 2015
+// Last time updated at Saturday, October 10th, 2015, 10:51:40 AM 
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -9,6 +9,9 @@
 // updates?
 /*
 -. this.recorderType = StereoAudioRecorder;
+-. this.bitsPerSeconds = 128000;
+-. this.quality = 10;
+-. this.speed = 100;
 */
 
 //------------------------------------
@@ -40,18 +43,27 @@ function MediaStreamRecorder(mediaStream) {
     // void start(optional long timeSlice)
     // timestamp to fire "ondataavailable"
     this.start = function(timeSlice) {
-        // Media Stream Recording API has not been implemented in chrome yet;
-        // That's why using WebAudio API to record stereo audio in WAV format
-        var Recorder = IsChrome || IsEdge || IsOpera ? window.StereoAudioRecorder || IsEdge || IsOpera : window.MediaRecorderWrapper;
+        var Recorder;
 
-        // video recorder (in WebM format)
-        if (this.mimeType.indexOf('video') !== -1) {
-            Recorder = IsChrome || IsEdge || IsOpera ? window.WhammyRecorder : window.MediaRecorderWrapper;
+        if (typeof MediaRecorder !== 'undefined') {
+            Recorder = MediaStreamRecorder;
+        } else if (IsChrome || IsOpera || IsEdge) {
+            if (this.mimeType.indexOf('video') !== -1) {
+                Recorder = WhammyRecorder;
+            } else if (this.mimeType.indexOf('audio') !== -1) {
+                Recorder = StereoAudioRecorder;
+            }
+        }
+
+        // audio recording support in MediaRecorder API coming soon (in Chrome)
+        // todo: remove this if block.
+        if (typeof MediaStream !== 'undefined' && IsChrome && this.mimeType.indexOf('audio') !== -1) {
+            Recorder = StereoAudioRecorder;
         }
 
         // video recorder (in GIF format)
         if (this.mimeType === 'image/gif') {
-            Recorder = window.GifRecorder;
+            Recorder = GifRecorder;
         }
 
         // allows forcing StereoAudioRecorder.js on Edge/Firefox
@@ -264,27 +276,33 @@ function MultiStreamRecorder(mediaStream) {
 // _____________________________
 // Cross-Browser-Declarations.js
 
+if (typeof window === 'undefined') {
+    /*jshint -W020 */
+    window = {};
+}
+
 // WebAudio API representer
-if (typeof AudioContext !== 'undefined') {
+var AudioContext = window.AudioContext;
+
+if (typeof AudioContext === 'undefined') {
     if (typeof webkitAudioContext !== 'undefined') {
-        /*global AudioContext:true*/
-        var AudioContext = webkitAudioContext;
+        /*global AudioContext:true */
+        AudioContext = webkitAudioContext;
     }
 
     if (typeof mozAudioContext !== 'undefined') {
-        /*global AudioContext:true*/
-        var AudioContext = mozAudioContext;
+        /*global AudioContext:true */
+        AudioContext = mozAudioContext;
     }
 }
 
-if (typeof URL !== 'undefined' && typeof webkitURL !== 'undefined') {
-    /*global URL:true*/
-    var URL = webkitURL;
-}
+/*jshint -W079 */
+var URL = window.URL;
 
-var IsEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
-var IsOpera = !!window.opera || navigator.userAgent.indexOf('OPR/') !== -1;
-var IsChrome = !IsEdge && !IsEdge && !!navigator.webkitGetUserMedia;
+if (typeof URL === 'undefined' && typeof webkitURL !== 'undefined') {
+    /*global URL:true */
+    URL = webkitURL;
+}
 
 if (typeof navigator !== 'undefined') {
     if (typeof navigator.webkitGetUserMedia !== 'undefined') {
@@ -301,8 +319,31 @@ if (typeof navigator !== 'undefined') {
     };
 }
 
-if (typeof webkitMediaStream !== 'undefined') {
-    var MediaStream = webkitMediaStream;
+var IsEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveBlob || !!navigator.msSaveOrOpenBlob);
+
+var IsOpera = false;
+if (typeof opera !== 'undefined' && navigator.userAgent && navigator.userAgent.indexOf('OPR/') !== -1) {
+    IsOpera = true;
+}
+var IsChrome = !IsEdge && !IsEdge && !!navigator.webkitGetUserMedia;
+
+var MediaStream = window.MediaStream;
+
+if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+    MediaStream = webkitMediaStream;
+}
+
+/*global MediaStream:true */
+if (!('stop' in MediaStream.prototype)) {
+    MediaStream.prototype.stop = function() {
+        this.getAudioTracks().forEach(function(track) {
+            track.stop();
+        });
+
+        this.getVideoTracks().forEach(function(track) {
+            track.stop();
+        });
+    };
 }
 
 // Merge all other data-types except "function"
@@ -402,7 +443,7 @@ function bytesToSize(bytes) {
 // ______________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
 // ObjectStore.js
 var ObjectStore = {
-    AudioContext: window.AudioContext || window.webkitAudioContext
+    AudioContext: AudioContext
 };
 
 // ______________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
@@ -426,19 +467,6 @@ var ObjectStore = {
  */
 
 function MediaRecorderWrapper(mediaStream) {
-    // if user chosen only audio option; and he tried to pass MediaStream with
-    // both audio and video tracks;
-    // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
-    if (this.type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
-        var context = new AudioContext();
-        var mediaStreamSource = context.createMediaStreamSource(mediaStream);
-
-        var destination = context.createMediaStreamDestination();
-        mediaStreamSource.connect(destination);
-
-        mediaStream = destination.stream;
-    }
-
     // void start(optional long timeSlice)
     // timestamp to fire "ondataavailable"
 
@@ -447,6 +475,14 @@ function MediaRecorderWrapper(mediaStream) {
     this.start = function(mTimeSlice) {
         mTimeSlice = mTimeSlice || 1000;
         isStopRecording = false;
+
+        if (!self.mimeType) {
+            self.mimeType = 'video/webm';
+        }
+
+        if (!self.bitsPerSecond) {
+            self.bitsPerSecond = 12800;
+        }
 
         function startRecording() {
             if (isStopRecording) {
@@ -458,10 +494,44 @@ function MediaRecorderWrapper(mediaStream) {
                 return;
             }
 
-            mediaRecorder = new MediaRecorder(mediaStream);
+            // if user chosen only audio option; and he tried to pass MediaStream with
+            // both audio and video tracks;
+            // using a dirty workaround to generate audio-only stream so that we can get audio/ogg output.
+            if (!IsChrome && self.type === 'audio' && mediaStream.getVideoTracks && mediaStream.getVideoTracks().length && !navigator.mozGetUserMedia) {
+                var context = new AudioContext();
+                var mediaStreamSource = context.createMediaStreamSource(mediaStream);
+
+                var destination = context.createMediaStreamDestination();
+                mediaStreamSource.connect(destination);
+
+                mediaStream = destination.stream;
+
+                if (!self.mimeType || self.mimeType.indexOf('audio') === -1) {
+                    self.mimeType = 'audio/ogg';
+                }
+            }
+
+            var recorderHints = {
+                mimeType: self.mimeType,
+                bitsPerSecond: self.bitsPerSecond
+            };
+
+            if (IsChrome) {
+                if (!recorderHints || typeof recorderHints !== 'string') {
+                    recorderHints = 'video/vp8';
+
+                    // chrome currently supports only video recording
+                    mediaStream = new MediaStream(mediaStream.getVideoTracks());
+                }
+            }
+
+            mediaRecorder = new MediaRecorder(mediaStream, recorderHints);
 
             mediaRecorder.ondataavailable = function(e) {
-                console.log('ondataavailable', e.data.type, e.data.size, e.data);
+                if (IsChrome && e.data && !('size' in e.data)) {
+                    e.data.size = e.data.length || e.data.byteLength || 0;
+                }
+
                 // mediaRecorder.state === 'recording' means that media recorder is associated with "session"
                 // mediaRecorder.state === 'stopped' means that media recorder is detached from the "session" ... in this case; "session" will also be deleted.
 
@@ -971,7 +1041,7 @@ function WhammyRecorderHelper(mediaStream, root) {
         video.play();
 
         lastTime = new Date().getTime();
-        whammy = new Whammy.Video();
+        whammy = new Whammy.Video(root.speed, root.quality);
 
         console.log('canvas resolutions', canvas.width, '*', canvas.height);
         console.log('video width/height', video.width || canvas.width, '*', video.height || canvas.height);
@@ -1372,10 +1442,13 @@ function GifRecorder(mediaStream) {
 var Whammy = (function() {
     // a more abstract-ish API
 
-    function WhammyVideo(duration) {
+    function WhammyVideo(duration, quality) {
         this.frames = [];
-        this.duration = duration || 1;
-        this.quality = 0.8;
+        if (!duration) {
+            duration = 1;
+        }
+        this.duration = 1000 / duration;
+        this.quality = quality || 0.8;
     }
 
     /**

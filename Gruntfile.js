@@ -14,7 +14,8 @@ module.exports = function(grunt) {
         concat: {
             options: {
                 stripBanners: true,
-                separator: '\n'
+                separator: '\n',
+                banner: '// Last time updated at <%= grunt.template.today("dddd, mmmm dS, yyyy, h:MM:ss TT") %> \n\n'
             },
             dist: {
                 src: [
@@ -101,7 +102,9 @@ module.exports = function(grunt) {
             files: ['MediaStreamRecorder.js'],
             ignore_warning: {
                 options: {
-                    '-W015': true
+                    '-W015': true,
+                    'validthis': true,
+                    '-W020': true
                 }
             }
         },
@@ -119,8 +122,10 @@ module.exports = function(grunt) {
             files: [
                 './AudioStreamRecorder/*.js',
                 './VideoStreamRecorder/*.js',
+                './VideoStreamRecorder/lib/whammy.js',
                 './common/*.js',
-                'Gruntfile.js'
+                'Gruntfile.js',
+                'MediaStreamRecorder.js'
             ],
             options: {
                 js: {
