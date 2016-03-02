@@ -55,15 +55,15 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         recordingLength = 0;
         requestDataInvoked = false;
 
-        // we flat the left and right channels down
+        // we flat the left and right channels down. flat out right only if stereo recording
         var leftBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
-        var rightBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
-
+        
         // we interleave both channels together
+        var interleaved = leftBuffer;  // Mono recording
         if (numChannels === 2) {
+            // Stereo recording - should mergeBuffers take internalRightChannel instead ?
+            var rightBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
             var interleaved = interleave(leftBuffer, rightBuffer);
-        } else {
-            var interleaved = leftBuffer;
         }
 
         // we create our wav file
@@ -72,20 +72,29 @@ function StereoAudioRecorderHelper(mediaStream, root) {
 
         // RIFF chunk descriptor
         writeUTFBytes(view, 0, 'RIFF');
+        // File length
         view.setUint32(4, 44 + interleaved.length * 2, true);
+        // RIF type
         writeUTFBytes(view, 8, 'WAVE');
-        // FMT sub-chunk
+        // FMT sub-chunk - format chunk identifier
         writeUTFBytes(view, 12, 'fmt ');
+        // format chunk length
         view.setUint32(16, 16, true);
+        // sample format (raw)
         view.setUint16(20, 1, true);
-        // stereo (2 channels)
+        // stereo (2 channels) - channel count
         view.setUint16(22, numChannels, true);
+        // sample rate
         view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 4, true);
+        // byte rate (sample rate * channel count * bitsPerSample/8)
+        view.setUint32(28, sampleRate * numChannels * 2, true);
+        // block align (numChannels * bitsPerSample/8)
         view.setUint16(32, numChannels * 2, true);
+        // bitsPerSample
         view.setUint16(34, 16, true);
-        // data sub-chunk
+        // data sub-chunk - Subchunk2ID
         writeUTFBytes(view, 36, 'data');
+        //Subchunk2Size
         view.setUint32(40, interleaved.length * 2, true);
 
         // write the PCM samples
