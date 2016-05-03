@@ -9,18 +9,21 @@ function MediaStreamRecorder(mediaStream) {
     // void start(optional long timeSlice)
     // timestamp to fire "ondataavailable"
     this.start = function(timeSlice) {
-        // Media Stream Recording API has not been implemented in chrome yet;
-        // That's why using WebAudio API to record stereo audio in WAV format
-        var Recorder = IsChrome || IsEdge || IsOpera ? window.StereoAudioRecorder || IsEdge || IsOpera : window.MediaRecorderWrapper;
+        var Recorder;
 
-        // video recorder (in WebM format)
-        if (this.mimeType.indexOf('video') !== -1) {
-            Recorder = IsChrome || IsEdge || IsOpera ? window.WhammyRecorder : window.MediaRecorderWrapper;
+        if (typeof MediaRecorder !== 'undefined') {
+            Recorder = MediaRecorderWrapper;
+        } else if (IsChrome || IsOpera || IsEdge) {
+            if (this.mimeType.indexOf('video') !== -1) {
+                Recorder = WhammyRecorder;
+            } else if (this.mimeType.indexOf('audio') !== -1) {
+                Recorder = StereoAudioRecorder;
+            }
         }
 
         // video recorder (in GIF format)
         if (this.mimeType === 'image/gif') {
-            Recorder = window.GifRecorder;
+            Recorder = GifRecorder;
         }
 
         // allows forcing StereoAudioRecorder.js on Edge/Firefox

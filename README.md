@@ -251,7 +251,7 @@ function xhr(url, data, callback) {
 
 ## `recorderType`
 
-You can force StereoAudioRecorder or WhammyRecorder or similar records on Firefox or Edge; even on Chrome and Opera.
+You can force StereoAudioRecorder or WhammyRecorder or similar recorders on Firefox or Edge; even on Chrome and Opera.
 
 All browsers will be using your specified recorder:
 
@@ -259,18 +259,18 @@ All browsers will be using your specified recorder:
 // force WebAudio API on all browsers
 // it allows you record remote audio-streams in Firefox
 // it also works in Microsoft Edge
-mediaRecorder.type = StereoAudioRecorder;
+mediaRecorder.recorderType = StereoAudioRecorder;
 
 // force webp based webm encoder on all browsers
-mediaRecorder.type = WhammyRecorder;
+mediaRecorder.recorderType = WhammyRecorder;
 
 // force MediaRecorder API on all browsers
-// Chrome is going to implement MediaRecorder API soon;
+// Chrome Canary/Dev already implemented MediaRecorder API however it is still behind a flag.
 // so this property allows you force MediaRecorder in Chrome.
-mediaRecorder.type = MediaRecorderWrapper;
+mediaRecorder.recorderType = MediaRecorderWrapper;
 
 // force GifRecorder in all browsers. Both WhammyRecorder and MediaRecorder API will be ignored.
-mediaRecorder.type = GifRecorder;
+mediaRecorder.recorderType = GifRecorder;
 ```
 
 ## `audioChannels`
@@ -435,6 +435,27 @@ audioRecorder.mimeType = 'audio/wav';
 gifRecorder.mimeType = 'image/gif';
 ```
 
+## bitsPerSecond
+
+```javascript
+// currently supported only in Firefox
+videoRecorder.bitsPerSecond = 12800;
+```
+
+## quality
+
+```javascript
+// only chrome---whilst using WhammyRecorder
+videoRecorder.quality = .8;
+```
+
+## speed
+
+```javascript
+// only chrome---whilst using WhammyRecorder
+videoRecorder.speed = 100;
+```
+
 ## Browser Support
 
 | Browser        | Support           |
@@ -453,4 +474,4 @@ gifRecorder.mimeType = 'image/gif';
 
 ## License
 
-[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://www.webrtc-experiment.com/licence/).
+[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://github.com/streamproc/MediaStreamRecorder/blob/master/LICENSE).

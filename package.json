@@ -1,7 +1,7 @@
 {
   "name": "msr",
   "preferGlobal": true,
-  "version": "1.2.8",
+  "version": "1.2.9",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -61,15 +61,14 @@
   "homepage": "https://www.webrtc-experiment.com/msr/",
   "_from": "msr@",
   "devDependencies": {
-    "grunt": "latest",
-    "grunt-cli": "latest",
-    "load-grunt-tasks": "latest",
-    "grunt-contrib-concat": "latest",
-    "grunt-contrib-csslint": "latest",
-    "grunt-contrib-jshint": "latest",
-    "grunt-contrib-uglify": "latest",
-    "grunt-htmlhint": "latest",
-    "grunt-jsbeautifier": "latest",
-    "grunt-bump": "latest"
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "load-grunt-tasks": "3.2.0",
+    "grunt-contrib-concat": "0.5.1",
+    "grunt-contrib-csslint": "0.4.0",
+    "grunt-contrib-uglify": "0.9.1",
+    "grunt-htmlhint": "0.4.1",
+    "grunt-jsbeautifier": "0.2.10",
+    "grunt-bump": "0.3.1"
   }
 }
