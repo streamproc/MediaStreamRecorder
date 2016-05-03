@@ -12,9 +12,10 @@
 <head>
     <title>MultiStreamRecorder.js & MediaStreamRecorder</title>
 
-    <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"></script>
+    <script src="https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js"></script>
+    
     <!-- for Edige/FF/Chrome/Opera/etc. getUserMedia support -->
-    <script src="https://cdn.rawgit.com/webrtc/adapter/master/adapter.js"></script>
+    <script src="https://cdn.WebRTC-Experiment.com/gumadapter.js"></script>
 
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
@@ -261,11 +262,27 @@ function onMediaError(e) {
             </div>
             <button id="send-message" style="font-size: 1em;">Send Message</button><small style="margin-left:1em;">Enter your email too; if you want "direct" reply!</small>
         </section>
+
+        <section class="experiment own-widgets latest-commits">
+            <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/streamproc/MediaStreamRecorder/commits/master" target="_blank">Latest Updates</a>
+            </h2>
+            <div id="github-commits"></div>
+        </section>
+
         <script>
             window.useThisGithubPath = 'streamproc/MediaStreamRecorder';
         </script>
         <script src="https://cdn.webrtc-experiment.com/commits.js" async></script>
     </article>
+
+    <a href="https://github.com/streamproc/MediaStreamRecorder" class="fork-left"></a>
+
+    <footer>
+        <p>
+            <a href="https://www.webrtc-experiment.com/">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
+            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
+        </p>
+    </footer>
 </body>
 
 </html>

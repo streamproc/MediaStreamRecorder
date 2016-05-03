@@ -4,14 +4,6 @@
 // https://www.WebRTC-Experiment.com/MediaStreamRecorder.js
 // npm install msr
 
-// updates?
-/*
--. this.recorderType = StereoAudioRecorder;
--. this.bitsPerSeconds = 128000;
--. this.quality = 10;
--. this.speed = 100;
-*/
-
 //------------------------------------
 
 // Browsers Support::
@@ -27,5 +19,3 @@
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.WebRTC-Experiment.com/licence
 //------------------------------------
-
-'use strict';

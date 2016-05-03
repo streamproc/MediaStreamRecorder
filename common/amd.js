@@ -2,10 +2,10 @@
 (function(root, factory) {
     if (typeof exports === 'object') {
         // CommonJS
-        module.exports = factory(require('testmsr'));
+        module.exports = factory(require('msr'));
     } else if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['testmsr'], function() {
+        define(['msr'], function() {
             return (root.returnExportsGlobal = factory(MediaStreamRecorder));
         });
     } else {

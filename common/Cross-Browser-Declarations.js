@@ -59,42 +59,69 @@ if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefine
 }
 
 /*global MediaStream:true */
-if (!('stop' in MediaStream.prototype)) {
-    MediaStream.prototype.stop = function() {
-        this.getAudioTracks().forEach(function(track) {
-            track.stop();
-        });
+if (typeof MediaStream !== 'undefined') {
+    if (!('getVideoTracks' in MediaStream.prototype)) {
+        MediaStream.prototype.getVideoTracks = function() {
+            if (!this.getTracks) {
+                return [];
+            }
 
-        this.getVideoTracks().forEach(function(track) {
-            track.stop();
-        });
-    };
+            var tracks = [];
+            this.getTracks.forEach(function(track) {
+                if (track.kind.toString().indexOf('video') !== -1) {
+                    tracks.push(track);
+                }
+            });
+            return tracks;
+        };
+
+        MediaStream.prototype.getAudioTracks = function() {
+            if (!this.getTracks) {
+                return [];
+            }
+
+            var tracks = [];
+            this.getTracks.forEach(function(track) {
+                if (track.kind.toString().indexOf('audio') !== -1) {
+                    tracks.push(track);
+                }
+            });
+            return tracks;
+        };
+    }
+
+    if (!('stop' in MediaStream.prototype)) {
+        MediaStream.prototype.stop = function() {
+            this.getAudioTracks().forEach(function(track) {
+                if (!!track.stop) {
+                    track.stop();
+                }
+            });
+
+            this.getVideoTracks().forEach(function(track) {
+                if (!!track.stop) {
+                    track.stop();
+                }
+            });
+        };
+    }
+}
+
+if (typeof location !== 'undefined') {
+    if (location.href.indexOf('file:') === 0) {
+        console.error('Please load this HTML file on HTTP or HTTPS.');
+    }
 }
 
 // Merge all other data-types except "function"
 
 function mergeProps(mergein, mergeto) {
-    mergeto = reformatProps(mergeto);
     for (var t in mergeto) {
         if (typeof mergeto[t] !== 'function') {
             mergein[t] = mergeto[t];
         }
     }
     return mergein;
-}
-
-function reformatProps(obj) {
-    var output = {};
-    for (var o in obj) {
-        if (o.indexOf('-') !== -1) {
-            var splitted = o.split('-');
-            var name = splitted[0] + splitted[1].split('')[0].toUpperCase() + splitted[1].substr(1);
-            output[name] = obj[o];
-        } else {
-            output[o] = obj[o];
-        }
-    }
-    return output;
 }
 
 // "dropFirstFrame" has been added by Graham Roth
@@ -105,16 +132,25 @@ function dropFirstFrame(arr) {
     return arr;
 }
 
+/**
+ * @param {Blob} file - File or Blob object. This parameter is required.
+ * @param {string} fileName - Optional file name e.g. "Recorded-Video.webm"
+ * @example
+ * invokeSaveAsDialog(blob or file, [optional] fileName);
+ * @see {@link https://github.com/muaz-khan/RecordRTC|RecordRTC Source Code}
+ */
 function invokeSaveAsDialog(file, fileName) {
     if (!file) {
         throw 'Blob object is required.';
     }
 
     if (!file.type) {
-        file.type = 'video/webm';
+        try {
+            file.type = 'video/webm';
+        } catch (e) {}
     }
 
-    var fileExtension = file.type.split('/')[1];
+    var fileExtension = (file.type || 'video/webm').split('/')[1];
 
     if (fileName && fileName.indexOf('.') !== -1) {
         var splitted = fileName.split('.');
@@ -170,3 +206,46 @@ function bytesToSize(bytes) {
 var ObjectStore = {
     AudioContext: AudioContext
 };
+
+function isMediaRecorderCompatible() {
+    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    var isChrome = !!window.chrome && !isOpera;
+    var isFirefox = typeof window.InstallTrigger !== 'undefined';
+
+    if (isFirefox) {
+        return true;
+    }
+
+    if (!isChrome) {
+        return false;
+    }
+
+    var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var fullVersion = '' + parseFloat(navigator.appVersion);
+    var majorVersion = parseInt(navigator.appVersion, 10);
+    var nameOffset, verOffset, ix;
+
+    if (isChrome) {
+        verOffset = nAgt.indexOf('Chrome');
+        fullVersion = nAgt.substring(verOffset + 7);
+    }
+
+    // trim the fullVersion string at semicolon/space if present
+    if ((ix = fullVersion.indexOf(';')) !== -1) {
+        fullVersion = fullVersion.substring(0, ix);
+    }
+
+    if ((ix = fullVersion.indexOf(' ')) !== -1) {
+        fullVersion = fullVersion.substring(0, ix);
+    }
+
+    majorVersion = parseInt('' + fullVersion, 10);
+
+    if (isNaN(majorVersion)) {
+        fullVersion = '' + parseFloat(navigator.appVersion);
+        majorVersion = parseInt(navigator.appVersion, 10);
+    }
+
+    return majorVersion >= 49;
+}

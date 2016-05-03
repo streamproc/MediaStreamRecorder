@@ -12,19 +12,13 @@ function MediaStreamRecorder(mediaStream) {
         var Recorder;
 
         if (typeof MediaRecorder !== 'undefined') {
-            Recorder = MediaStreamRecorder;
+            Recorder = MediaRecorderWrapper;
         } else if (IsChrome || IsOpera || IsEdge) {
             if (this.mimeType.indexOf('video') !== -1) {
                 Recorder = WhammyRecorder;
             } else if (this.mimeType.indexOf('audio') !== -1) {
                 Recorder = StereoAudioRecorder;
             }
-        }
-
-        // audio recording support in MediaRecorder API coming soon (in Chrome)
-        // todo: remove this if block.
-        if (typeof MediaStream !== 'undefined' && IsChrome && this.mimeType.indexOf('audio') !== -1) {
-            Recorder = StereoAudioRecorder;
         }
 
         // video recorder (in GIF format)

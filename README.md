@@ -446,7 +446,7 @@ videoRecorder.bitsPerSecond = 12800;
 
 ```javascript
 // only chrome---whilst using WhammyRecorder
-videoRecorder.quality = 10;
+videoRecorder.quality = .8;
 ```
 
 ## speed
@@ -474,4 +474,4 @@ videoRecorder.speed = 100;
 
 ## License
 
-[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://www.webrtc-experiment.com/licence/).
+[MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library is released under [MIT licence](https://github.com/streamproc/MediaStreamRecorder/blob/master/LICENSE).
