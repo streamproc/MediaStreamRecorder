@@ -1,13 +1,13 @@
 {
   "name": "msr",
   "preferGlobal": false,
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
     "url": "http://www.muazkhan.com/"
   },
-  "description": "Cross-Browser recording of audio/video media streams; targets WebRTC/getUserMedia/WebAudio/etc. Works both on Chrome/Firefox/Opera on desktop & android.",
+  "description": "Cross-Browser recording of audio/video media streams; targets WebRTC/getUserMedia/WebAudio/etc.",
   "scripts": {
     "start": "node server.js"
   },

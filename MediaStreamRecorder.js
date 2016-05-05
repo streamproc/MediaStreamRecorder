@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-05 5:44:00 AM UTC
+// Last time updated: 2016-05-05 6:31:59 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -48,6 +48,11 @@ function MediaStreamRecorder(mediaStream) {
         // video recorder (in GIF format)
         if (this.mimeType === 'image/gif') {
             Recorder = GifRecorder;
+        }
+
+        // audio/wav is supported only via StereoAudioRecorder
+        if (this.mimeType === 'audio/wav') {
+            Recorder = StereoAudioRecorder;
         }
 
         // allows forcing StereoAudioRecorder.js on Edge/Firefox
@@ -127,7 +132,14 @@ function MediaStreamRecorder(mediaStream) {
         console.log('Resumed recording.', this.mimeType || mediaRecorder.mimeType);
     };
 
-    this.recorderType = null; // StereoAudioRecorder || WhammyRecorder || MediaRecorderWrapper || GifRecorder
+    // StereoAudioRecorder || WhammyRecorder || MediaRecorderWrapper || GifRecorder
+    this.recorderType = null;
+
+    // video/webm or audio/webm or audio/ogg or audio/wav
+    this.mimeType = 'video/webm';
+
+    // logs are enabled by default
+    this.disableLogs = false;
 
     // Reference to "MediaRecorder.js"
     var mediaRecorder;
@@ -680,6 +692,9 @@ function MediaRecorderWrapper(mediaStream) {
             });
 
             self.ondataavailable(blob);
+
+            // record next interval
+            self.start(timeSlice);
         };
 
         mediaRecorder.onerror = function(error) {
@@ -715,7 +730,19 @@ function MediaRecorderWrapper(mediaStream) {
         // handler. "mTimeSlice < 0" means Session object does not push encoded data to
         // onDataAvailable, instead, it passive wait the client side pull encoded data
         // by calling requestData API.
-        mediaRecorder.start(timeSlice || 3.6e+6);
+        mediaRecorder.start(3.6e+6);
+
+        setTimeout(function() {
+            if (!mediaRecorder) {
+                return;
+            }
+
+            if (mediaRecorder.state === 'recording') {
+                // "stop" method auto invokes "requestData"!
+                mediaRecorder.requestData();
+                mediaRecorder.stop();
+            }
+        }, timeSlice);
 
         // Start recording. If timeSlice has been provided, mediaRecorder will
         // raise a dataavailable event containing the Blob of collected data on every timeSlice milliseconds.
@@ -835,8 +862,6 @@ function MediaRecorderWrapper(mediaStream) {
         }
         return true;
     }
-
-    var self = this;
 
     // this method checks if media stream is stopped
     // or any track is ended.

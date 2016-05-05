@@ -56,6 +56,11 @@
 
             <br>
 
+            <select id="audio-mimeType" style="font-size:22px;vertical-align: middle;margin-right: 5px;">
+                <option>audio/webm</option>
+                <option>audio/wav</option>
+            </select>
+
             <button id="start-recording">Start</button>
             <button id="stop-recording" disabled>Stop</button>
 
@@ -134,7 +139,7 @@
 
                 mediaRecorder = new MediaStreamRecorder(stream);
                 mediaRecorder.stream = stream;
-                mediaRecorder.mimeType = 'audio/ogg';
+                mediaRecorder.mimeType = document.getElementById('audio-mimeType').value;
                 mediaRecorder.audioChannels = !!document.getElementById('left-channel').checked ? 1 : 2;
                 mediaRecorder.ondataavailable = function(blob) {
                     var a = document.createElement('a');
@@ -190,15 +195,14 @@
 // cdn.webrtc-experiment.com/MediaStreamRecorder.js
 
 var mediaConstraints = {
-    audio: !!navigator.mozGetUserMedia, // if firefox (don't use for chrome)
-    video: true  // if firefox or chrome
+    audio: true
 };
 
 navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
 function onMediaSuccess(stream) {
     var mediaRecorder = new MediaStreamRecorder(stream);
-    mediaRecorder.mimeType = 'video/webm';
+    mediaRecorder.mimeType = 'audio/webm'; // audio/webm or audio/ogg or audio/wav
     mediaRecorder.ondataavailable = function (blob) {
         // POST/PUT "Blob" using FormData/XHR2
         var blobURL = URL.createObjectURL(blob);

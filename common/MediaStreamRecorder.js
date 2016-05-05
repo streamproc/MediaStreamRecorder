@@ -26,6 +26,11 @@ function MediaStreamRecorder(mediaStream) {
             Recorder = GifRecorder;
         }
 
+        // audio/wav is supported only via StereoAudioRecorder
+        if (this.mimeType === 'audio/wav') {
+            Recorder = StereoAudioRecorder;
+        }
+
         // allows forcing StereoAudioRecorder.js on Edge/Firefox
         if (this.recorderType) {
             Recorder = this.recorderType;
@@ -103,7 +108,14 @@ function MediaStreamRecorder(mediaStream) {
         console.log('Resumed recording.', this.mimeType || mediaRecorder.mimeType);
     };
 
-    this.recorderType = null; // StereoAudioRecorder || WhammyRecorder || MediaRecorderWrapper || GifRecorder
+    // StereoAudioRecorder || WhammyRecorder || MediaRecorderWrapper || GifRecorder
+    this.recorderType = null;
+
+    // video/webm or audio/webm or audio/ogg or audio/wav
+    this.mimeType = 'video/webm';
+
+    // logs are enabled by default
+    this.disableLogs = false;
 
     // Reference to "MediaRecorder.js"
     var mediaRecorder;
