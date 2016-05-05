@@ -294,3 +294,7 @@ function WhammyRecorderHelper(mediaStream, root) {
         isPaused = false;
     };
 }
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.WhammyRecorderHelper = WhammyRecorderHelper;
+}

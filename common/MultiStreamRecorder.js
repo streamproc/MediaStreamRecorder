@@ -121,3 +121,7 @@ function MultiStreamRecorder(mediaStream) {
     var audioVideoBlobs = {};
     var recordingInterval = 0;
 }
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.MultiStreamRecorder = MultiStreamRecorder;
+}

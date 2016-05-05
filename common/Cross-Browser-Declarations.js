@@ -1,6 +1,67 @@
 // _____________________________
 // Cross-Browser-Declarations.js
 
+var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+(function(that) {
+    if (typeof window !== 'undefined') {
+        return;
+    }
+
+    if (typeof window === 'undefined' && typeof global !== 'undefined') {
+        global.navigator = {
+            userAgent: browserFakeUserAgent,
+            getUserMedia: function() {}
+        };
+
+        /*global window:true */
+        that.window = global;
+    } else if (typeof window === 'undefined') {
+        // window = this;
+    }
+
+    if (typeof document === 'undefined') {
+        /*global document:true */
+        that.document = {};
+
+        document.createElement = document.captureStream = document.mozCaptureStream = function() {
+            return {};
+        };
+    }
+
+    if (typeof location === 'undefined') {
+        /*global location:true */
+        that.location = {
+            protocol: 'file:',
+            href: '',
+            hash: ''
+        };
+    }
+
+    if (typeof screen === 'undefined') {
+        /*global screen:true */
+        that.screen = {
+            width: 0,
+            height: 0
+        };
+    }
+})(typeof global !== 'undefined' ? global : window);
+
+// WebAudio API representer
+var AudioContext = window.AudioContext;
+
+if (typeof AudioContext === 'undefined') {
+    if (typeof webkitAudioContext !== 'undefined') {
+        /*global AudioContext:true */
+        AudioContext = webkitAudioContext;
+    }
+
+    if (typeof mozAudioContext !== 'undefined') {
+        /*global AudioContext:true */
+        AudioContext = mozAudioContext;
+    }
+}
+
 if (typeof window === 'undefined') {
     /*jshint -W020 */
     window = {};
@@ -38,9 +99,9 @@ if (typeof navigator !== 'undefined') {
         navigator.getUserMedia = navigator.mozGetUserMedia;
     }
 } else {
-    /*global navigator:true */
-    var navigator = {
-        getUserMedia: {}
+    navigator = {
+        getUserMedia: function() {},
+        userAgent: browserFakeUserAgent
     };
 }
 

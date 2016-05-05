@@ -1,4 +1,4 @@
-// Last time updated: 2016-04-15 12:50:55 PM UTC
+// Last time updated: 2016-05-05 5:44:00 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -257,8 +257,73 @@ function MultiStreamRecorder(mediaStream) {
     var recordingInterval = 0;
 }
 
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.MultiStreamRecorder = MultiStreamRecorder;
+}
+
 // _____________________________
 // Cross-Browser-Declarations.js
+
+var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+(function(that) {
+    if (typeof window !== 'undefined') {
+        return;
+    }
+
+    if (typeof window === 'undefined' && typeof global !== 'undefined') {
+        global.navigator = {
+            userAgent: browserFakeUserAgent,
+            getUserMedia: function() {}
+        };
+
+        /*global window:true */
+        that.window = global;
+    } else if (typeof window === 'undefined') {
+        // window = this;
+    }
+
+    if (typeof document === 'undefined') {
+        /*global document:true */
+        that.document = {};
+
+        document.createElement = document.captureStream = document.mozCaptureStream = function() {
+            return {};
+        };
+    }
+
+    if (typeof location === 'undefined') {
+        /*global location:true */
+        that.location = {
+            protocol: 'file:',
+            href: '',
+            hash: ''
+        };
+    }
+
+    if (typeof screen === 'undefined') {
+        /*global screen:true */
+        that.screen = {
+            width: 0,
+            height: 0
+        };
+    }
+})(typeof global !== 'undefined' ? global : window);
+
+// WebAudio API representer
+var AudioContext = window.AudioContext;
+
+if (typeof AudioContext === 'undefined') {
+    if (typeof webkitAudioContext !== 'undefined') {
+        /*global AudioContext:true */
+        AudioContext = webkitAudioContext;
+    }
+
+    if (typeof mozAudioContext !== 'undefined') {
+        /*global AudioContext:true */
+        AudioContext = mozAudioContext;
+    }
+}
 
 if (typeof window === 'undefined') {
     /*jshint -W020 */
@@ -297,9 +362,9 @@ if (typeof navigator !== 'undefined') {
         navigator.getUserMedia = navigator.mozGetUserMedia;
     }
 } else {
-    /*global navigator:true */
-    var navigator = {
-        getUserMedia: {}
+    navigator = {
+        getUserMedia: function() {},
+        userAgent: browserFakeUserAgent
     };
 }
 
@@ -789,6 +854,10 @@ function MediaRecorderWrapper(mediaStream) {
     })();
 }
 
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.MediaRecorderWrapper = MediaRecorderWrapper;
+}
+
 // ======================
 // StereoAudioRecorder.js
 
@@ -835,6 +904,10 @@ function StereoAudioRecorder(mediaStream) {
     // Reference to "StereoAudioRecorder" object
     var mediaRecorder;
     var timeout;
+}
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.StereoAudioRecorder = StereoAudioRecorder;
 }
 
 // ============================
@@ -1068,6 +1141,10 @@ function StereoAudioRecorderHelper(mediaStream, root) {
     scriptprocessornode.connect(context.destination);
 }
 
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.StereoAudioRecorderHelper = StereoAudioRecorderHelper;
+}
+
 // ===================
 // WhammyRecorder.js
 
@@ -1126,6 +1203,10 @@ function WhammyRecorder(mediaStream) {
     // Reference to "WhammyRecorder" object
     var mediaRecorder;
     var timeout;
+}
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.WhammyRecorder = WhammyRecorder;
 }
 
 // ==========================
@@ -1425,6 +1506,10 @@ function WhammyRecorderHelper(mediaStream, root) {
     };
 }
 
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.WhammyRecorderHelper = WhammyRecorderHelper;
+}
+
 // --------------
 // GifRecorder.js
 
@@ -1559,6 +1644,10 @@ function GifRecorder(mediaStream) {
 
     var gifEncoder;
     var timeout;
+}
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.GifRecorder = GifRecorder;
 }
 
 // https://github.com/antimatter15/whammy/blob/master/LICENSE
@@ -1994,3 +2083,18 @@ var Whammy = (function() {
         Video: WhammyVideo
     };
 })();
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.Whammy = Whammy;
+}
+
+// https://github.com/streamproc/MediaStreamRecorder/issues/42
+if (typeof module !== 'undefined' /* && !!module.exports*/ ) {
+    module.exports = MediaStreamRecorder;
+}
+
+if (typeof define === 'function' && define.amd) {
+    define('MediaStreamRecorder', [], function() {
+        return MediaStreamRecorder;
+    });
+}

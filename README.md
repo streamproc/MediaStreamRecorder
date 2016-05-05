@@ -28,12 +28,48 @@ You can [install scripts using NPM](https://www.npmjs.org/package/msr):
 
 ```javascript
 npm install msr
+
+# or via "bower"
+bower install msr
+```
+
+Now try `node server.js` and open `https://localhost:9001/`
+
+# Test on NPM
+
+```javascript
+var MediaStreamRecorder = require('msr');
+
+console.log('require-msr', MediaStreamRecorder);
+
+console.log('\n\n-------\n\n');
+
+var recorder = new MediaStreamRecorder({});
+console.log('MediaStreamRecorder', recorder);
+
+console.log('\n\n-------\n\n');
+
+var multiStreamRecorder = new MediaStreamRecorder.MultiStreamRecorder({});
+console.log('MultiStreamRecorder', multiStreamRecorder);
+```
+
+* Live NPM test: https://tonicdev.com/npm/msr
+
+Or try `npm-test.js`:
+
+```
+cd node_modules
+cd msr
+node npm-test.js
 ```
 
 Then link single/standalone "MediaStreamRecorder.js" file:
 
 ```html
 <script src="./node_modules/msr/MediaStreamRecorder.js"> </script>
+
+<!-- or bower -->
+<script src="./bower_components/msr/MediaStreamRecorder.js"></script>
 ```
 
 ## Otherwise, you can "directly" link standalone file from CDN:

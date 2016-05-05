@@ -133,3 +133,7 @@ function GifRecorder(mediaStream) {
     var gifEncoder;
     var timeout;
 }
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.GifRecorder = GifRecorder;
+}

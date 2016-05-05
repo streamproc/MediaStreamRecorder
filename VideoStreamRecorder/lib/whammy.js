@@ -431,3 +431,7 @@ var Whammy = (function() {
         Video: WhammyVideo
     };
 })();
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.Whammy = Whammy;
+}

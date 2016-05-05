@@ -271,3 +271,7 @@ function MediaRecorderWrapper(mediaStream) {
         setTimeout(looper, 1000); // check every second
     })();
 }
+
+if (typeof MediaStreamRecorder !== 'undefined') {
+    MediaStreamRecorder.MediaRecorderWrapper = MediaRecorderWrapper;
+}
