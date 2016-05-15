@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-05 6:31:59 AM UTC
+// Last time updated: 2016-05-15 5:22:54 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -106,11 +106,9 @@ function MediaStreamRecorder(mediaStream) {
                 return;
             }
 
-            var bigBlob = new Blob(mediaRecorder.blobs, {
-                type: mediaRecorder.blobs[0].type || this.mimeType
+            ConcatenateBlobs(mediaRecorder.blobs, mediaRecorder.blobs[0].type, function(concatenatedBlob) {
+                invokeSaveAsDialog(concatenatedBlob);
             });
-
-            invokeSaveAsDialog(bigBlob);
             return;
         }
         invokeSaveAsDialog(file, fileName);
@@ -616,7 +614,7 @@ function MediaRecorderWrapper(mediaStream) {
      * @example
      * recorder.record();
      */
-    this.start = function(timeSlice) {
+    this.start = function(timeSlice, __disableLogs) {
         if (!self.mimeType) {
             self.mimeType = 'video/webm';
         }
@@ -640,12 +638,13 @@ function MediaRecorderWrapper(mediaStream) {
         }
 
         self.blob = null;
+        self.dontFireOnDataAvailableEvent = false;
 
         var recorderHints = {
             mimeType: self.mimeType
         };
 
-        if (!self.disableLogs) {
+        if (!self.disableLogs && !__disableLogs) {
             console.log('Passing following params over MediaRecorder API.', recorderHints);
         }
 
@@ -693,8 +692,12 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.ondataavailable(blob);
 
+            self.dontFireOnDataAvailableEvent = true;
+            mediaRecorder.stop();
+            mediaRecorder = null;
+
             // record next interval
-            self.start(timeSlice);
+            self.start(timeSlice, '__disableLogs');
         };
 
         mediaRecorder.onerror = function(error) {
@@ -740,7 +743,7 @@ function MediaRecorderWrapper(mediaStream) {
             if (mediaRecorder.state === 'recording') {
                 // "stop" method auto invokes "requestData"!
                 mediaRecorder.requestData();
-                mediaRecorder.stop();
+                // mediaRecorder.stop();
             }
         }, timeSlice);
 
@@ -770,7 +773,14 @@ function MediaRecorderWrapper(mediaStream) {
         if (mediaRecorder.state === 'recording') {
             // "stop" method auto invokes "requestData"!
             mediaRecorder.requestData();
-            mediaRecorder.stop();
+
+            setTimeout(function() {
+                self.dontFireOnDataAvailableEvent = true;
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                mediaRecorder = null;
+            }, 2000);
         }
     };
 
@@ -2112,6 +2122,69 @@ var Whammy = (function() {
 if (typeof MediaStreamRecorder !== 'undefined') {
     MediaStreamRecorder.Whammy = Whammy;
 }
+
+// Last time updated at Nov 18, 2014, 08:32:23
+
+// Latest file can be found here: https://cdn.webrtc-experiment.com/ConcatenateBlobs.js
+
+// Muaz Khan    - www.MuazKhan.com
+// MIT License  - www.WebRTC-Experiment.com/licence
+// Source Code  - https://github.com/muaz-khan/ConcatenateBlobs
+// Demo         - https://www.WebRTC-Experiment.com/ConcatenateBlobs/
+
+// ___________________
+// ConcatenateBlobs.js
+
+// Simply pass array of blobs.
+// This javascript library will concatenate all blobs in single "Blob" object.
+
+(function() {
+    window.ConcatenateBlobs = function(blobs, type, callback) {
+        var buffers = [];
+
+        var index = 0;
+
+        function readAsArrayBuffer() {
+            if (!blobs[index]) {
+                return concatenateBuffers();
+            }
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                buffers.push(event.target.result);
+                index++;
+                readAsArrayBuffer();
+            };
+            reader.readAsArrayBuffer(blobs[index]);
+        }
+
+        readAsArrayBuffer();
+
+        function concatenateBuffers() {
+            var byteLength = 0;
+            buffers.forEach(function(buffer) {
+                byteLength += buffer.byteLength;
+            });
+
+            var tmp = new Uint16Array(byteLength);
+            var lastOffset = 0;
+            buffers.forEach(function(buffer) {
+                // BYTES_PER_ELEMENT == 2 for Uint16Array
+                var reusableByteLength = buffer.byteLength;
+                if (reusableByteLength % 2 != 0) {
+                    buffer = buffer.slice(0, reusableByteLength - 1)
+                }
+                tmp.set(new Uint16Array(buffer), lastOffset);
+                lastOffset += reusableByteLength;
+            });
+
+            var blob = new Blob([tmp.buffer], {
+                type: type
+            });
+
+            callback(blob);
+        }
+    };
+})();
 
 // https://github.com/streamproc/MediaStreamRecorder/issues/42
 if (typeof module !== 'undefined' /* && !!module.exports*/ ) {

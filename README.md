@@ -75,7 +75,7 @@ Then link single/standalone "MediaStreamRecorder.js" file:
 <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 
 <!-- or link specific release -->
-<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.1/MediaStreamRecorder.js"></script>
+<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.2/MediaStreamRecorder.js"></script>
 ```
 
 ## Record audio+video

@@ -33,6 +33,7 @@ module.exports = function(grunt) {
                     'VideoStreamRecorder/WhammyRecorderHelper.js',
                     'VideoStreamRecorder/GifRecorder.js',
                     'VideoStreamRecorder/lib/whammy.js',
+                    'common/ConcatenateBlobs.js',
                     'common/amd.js'
                 ],
                 dest: 'MediaStreamRecorder.js'

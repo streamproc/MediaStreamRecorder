@@ -35,8 +35,8 @@
     <article>
         <header style="text-align: center;">
             <h1>
-                    <a href="https://www.webrtc-experiment.com/">WebRTC</a> Video Recording using <a href="https://github.com/streamproc/MediaStreamRecorder" target="_blank">MediaStreamRecorder</a>
-                </h1>
+                <a href="https://www.webrtc-experiment.com/">WebRTC</a> Video Recording using <a href="https://github.com/streamproc/MediaStreamRecorder" target="_blank">MediaStreamRecorder</a>
+            </h1>
             <p>
                 <a href="https://www.webrtc-experiment.com/">HOME</a>
                 <span> &copy; </span>
@@ -117,6 +117,8 @@
             document.querySelector('#save-recording').onclick = function() {
                 this.disabled = true;
                 mediaRecorder.save();
+
+                // alert('Drop WebM file on Chrome or Firefox. Both can play entire file. VLC player or other players may not work.');
             };
 
             var mediaRecorder;

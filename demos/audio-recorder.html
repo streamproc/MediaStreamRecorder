@@ -120,6 +120,8 @@
             document.querySelector('#save-recording').onclick = function() {
                 this.disabled = true;
                 mediaRecorder.save();
+
+                // alert('Drop WebM file on Chrome or Firefox. Both can play entire file. VLC player or other players may not work.');
             };
 
             var mediaRecorder;

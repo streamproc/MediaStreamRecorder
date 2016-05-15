@@ -22,7 +22,7 @@ function MediaRecorderWrapper(mediaStream) {
      * @example
      * recorder.record();
      */
-    this.start = function(timeSlice) {
+    this.start = function(timeSlice, __disableLogs) {
         if (!self.mimeType) {
             self.mimeType = 'video/webm';
         }
@@ -46,12 +46,13 @@ function MediaRecorderWrapper(mediaStream) {
         }
 
         self.blob = null;
+        self.dontFireOnDataAvailableEvent = false;
 
         var recorderHints = {
             mimeType: self.mimeType
         };
 
-        if (!self.disableLogs) {
+        if (!self.disableLogs && !__disableLogs) {
             console.log('Passing following params over MediaRecorder API.', recorderHints);
         }
 
@@ -99,8 +100,12 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.ondataavailable(blob);
 
+            self.dontFireOnDataAvailableEvent = true;
+            mediaRecorder.stop();
+            mediaRecorder = null;
+
             // record next interval
-            self.start(timeSlice);
+            self.start(timeSlice, '__disableLogs');
         };
 
         mediaRecorder.onerror = function(error) {
@@ -146,7 +151,7 @@ function MediaRecorderWrapper(mediaStream) {
             if (mediaRecorder.state === 'recording') {
                 // "stop" method auto invokes "requestData"!
                 mediaRecorder.requestData();
-                mediaRecorder.stop();
+                // mediaRecorder.stop();
             }
         }, timeSlice);
 
@@ -176,7 +181,14 @@ function MediaRecorderWrapper(mediaStream) {
         if (mediaRecorder.state === 'recording') {
             // "stop" method auto invokes "requestData"!
             mediaRecorder.requestData();
-            mediaRecorder.stop();
+
+            setTimeout(function() {
+                self.dontFireOnDataAvailableEvent = true;
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                mediaRecorder = null;
+            }, 2000);
         }
     };
 

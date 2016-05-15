@@ -82,11 +82,9 @@ function MediaStreamRecorder(mediaStream) {
                 return;
             }
 
-            var bigBlob = new Blob(mediaRecorder.blobs, {
-                type: mediaRecorder.blobs[0].type || this.mimeType
+            ConcatenateBlobs(mediaRecorder.blobs, mediaRecorder.blobs[0].type, function(concatenatedBlob) {
+                invokeSaveAsDialog(concatenatedBlob);
             });
-
-            invokeSaveAsDialog(bigBlob);
             return;
         }
         invokeSaveAsDialog(file, fileName);
