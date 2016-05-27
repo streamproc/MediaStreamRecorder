@@ -23,6 +23,8 @@ function StereoAudioRecorderHelper(mediaStream, root) {
     var volume;
     var audioInput;
     var sampleRate = root.sampleRate || deviceSampleRate;
+    var mimeType = root.mimeType || 'audio/wav';
+    var isPCM = mimeType.indexOf('audio/pcm') > -1;
     var context;
 
     var numChannels = root.audioChannels || 2;
@@ -66,45 +68,51 @@ function StereoAudioRecorderHelper(mediaStream, root) {
             var interleaved = leftBuffer;
         }
 
-        // we create our wav file
-        var buffer = new ArrayBuffer(44 + interleaved.length * 2);
-        var view = new DataView(buffer);
+         if (isPCM) {
+            console.debug('audio recorded blob size:', bytesToSize(interleaved.length));
+            root.ondataavailable(convertoFloat32ToInt16(interleaved));
+         } else {
 
-        // RIFF chunk descriptor
-        writeUTFBytes(view, 0, 'RIFF');
-        view.setUint32(4, 44 + interleaved.length * 2, true);
-        writeUTFBytes(view, 8, 'WAVE');
-        // FMT sub-chunk
-        writeUTFBytes(view, 12, 'fmt ');
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        // stereo (2 channels)
-        view.setUint16(22, numChannels, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 4, true);
-        view.setUint16(32, numChannels * 2, true);
-        view.setUint16(34, 16, true);
-        // data sub-chunk
-        writeUTFBytes(view, 36, 'data');
-        view.setUint32(40, interleaved.length * 2, true);
+            // we create our wav file
+            var buffer = new ArrayBuffer(44 + interleaved.length * 2);
+            var view = new DataView(buffer);
 
-        // write the PCM samples
-        var lng = interleaved.length;
-        var index = 44;
-        var volume = 1;
-        for (var i = 0; i < lng; i++) {
-            view.setInt16(index, interleaved[i] * (0x7FFF * volume), true);
-            index += 2;
-        }
+            // RIFF chunk descriptor
+            writeUTFBytes(view, 0, 'RIFF');
+            view.setUint32(4, 44 + interleaved.length * 2, true);
+            writeUTFBytes(view, 8, 'WAVE');
+            // FMT sub-chunk
+            writeUTFBytes(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            // stereo (2 channels)
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 4, true);
+            view.setUint16(32, numChannels * 2, true);
+            view.setUint16(34, 16, true);
+            // data sub-chunk
+            writeUTFBytes(view, 36, 'data');
+            view.setUint32(40, interleaved.length * 2, true);
 
-        // our final binary blob
-        var blob = new Blob([view], {
-            type: 'audio/wav'
-        });
+            // write the PCM samples
+            var lng = interleaved.length;
+            var index = 44;
+            var volume = 1;
+            for (var i = 0; i < lng; i++) {
+                view.setInt16(index, interleaved[i] * (0x7FFF * volume), true);
+                index += 2;
+            }
 
-        console.debug('audio recorded blob size:', bytesToSize(blob.size));
+            // our final binary blob
+            var blob = new Blob([view], {
+                type: 'audio/wav'
+            });
 
-        root.ondataavailable(blob);
+            console.debug('audio recorded blob size:', bytesToSize(blob.size));
+
+            root.ondataavailable(blob);
+         }
     };
 
     this.stop = function() {
@@ -146,6 +154,16 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         for (var i = 0; i < lng; i++) {
             view.setUint8(offset + i, string.charCodeAt(i));
         }
+    }
+
+    function convertoFloat32ToInt16(buffer) {
+        var l = buffer.length;
+        var buf = new Int16Array(l)
+
+        while (l--) {
+        buf[l] = buffer[l]*0xFFFF;    //convert to 16 bit
+        }
+        return buf.buffer
     }
 
     // creates the audio context
