@@ -23,6 +23,10 @@ function StereoAudioRecorderHelper(mediaStream, root) {
     var volume;
     var audioInput;
     var sampleRate = root.sampleRate || deviceSampleRate;
+
+    var mimeType = root.mimeType || 'audio/wav';
+    var isPCM = mimeType.indexOf('audio/pcm') > -1;
+
     var context;
 
     var numChannels = root.audioChannels || 2;
@@ -64,6 +68,17 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         if (numChannels === 2) {
             var rightBuffer = mergeBuffers(internalRightChannel, internalRecordingLength); // bug fixed via #70,#71
             interleaved = interleave(leftBuffer, rightBuffer);
+        }
+
+        if (isPCM) {
+            // our final binary blob
+            var blob = new Blob([convertoFloat32ToInt16(interleaved)], {
+                type: 'audio/pcm'
+            });
+
+            console.debug('audio recorded blob size:', bytesToSize(blob.size));
+            root.ondataavailable(blob);
+            return;
         }
 
         // we create our wav file
@@ -149,6 +164,16 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         for (var i = 0; i < lng; i++) {
             view.setUint8(offset + i, string.charCodeAt(i));
         }
+    }
+
+    function convertoFloat32ToInt16(buffer) {
+        var l = buffer.length;
+        var buf = new Int16Array(l)
+
+        while (l--) {
+            buf[l] = buffer[l] * 0xFFFF; //convert to 16 bit
+        }
+        return buf.buffer
     }
 
     // creates the audio context

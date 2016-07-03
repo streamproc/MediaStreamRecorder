@@ -76,7 +76,8 @@
             <select id="audio-recorderType" style="font-size:22px;vertical-align: middle;margin-right: 5px;">
                 <option>[Best Available Recorder]</option>
                 <option>MediaRecorder API</option>
-                <option>WebAudio API</option>
+                <option>WebAudio API (WAV)</option>
+                <option>WebAudio API (PCM)</option>
             </select>
             <br>
 
@@ -167,8 +168,14 @@
                     mediaRecorder.recorderType = MediaRecorderWrapper;
                 }
 
-                if (recorderType === 'WebAudio API') {
+                if (recorderType === 'WebAudio API (WAV)') {
                     mediaRecorder.recorderType = StereoAudioRecorder;
+                    mediaRecorder.mimeType = 'audio/wav';
+                }
+
+                if (recorderType === 'WebAudio API (PCM)') {
+                    mediaRecorder.recorderType = StereoAudioRecorder;
+                    mediaRecorder.mimeType = 'audio/pcm';
                 }
 
                 // don't force any mimeType; use above "recorderType" instead.

@@ -78,7 +78,7 @@ Then link single/standalone "MediaStreamRecorder.js" file:
 <script src="https://www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 
 <!-- or link specific release -->
-<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.3/MediaStreamRecorder.js"></script>
+<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.4/MediaStreamRecorder.js"></script>
 ```
 
 ## Record audio+video
@@ -406,6 +406,7 @@ videoRecorder.mimeType = 'video/mp4';
 audioRecorder.mimeType = 'audio/webm'; // MediaRecorderWrapper
 audioRecorder.mimeType = 'audio/ogg'; // MediaRecorderWrapper
 audioRecorder.mimeType = 'audio/wav'; // StereoAudioRecorder
+audioRecorder.mimeType = 'audio/pcm'; // StereoAudioRecorder
 
 // gif:
 gifRecorder.mimeType = 'image/gif'; // GifRecorder
