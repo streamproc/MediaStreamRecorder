@@ -57,13 +57,13 @@ function StereoAudioRecorderHelper(mediaStream, root) {
 
         // we flat the left and right channels down
         var leftBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
-        var rightBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
+
+        var interleaved = leftBuffer;
 
         // we interleave both channels together
         if (numChannels === 2) {
-            var interleaved = interleave(leftBuffer, rightBuffer);
-        } else {
-            var interleaved = leftBuffer;
+            var rightBuffer = mergeBuffers(internalRightChannel, internalRecordingLength); // bug fixed via #70,#71
+            interleaved = interleave(leftBuffer, rightBuffer);
         }
 
         // we create our wav file
@@ -72,7 +72,10 @@ function StereoAudioRecorderHelper(mediaStream, root) {
 
         // RIFF chunk descriptor
         writeUTFBytes(view, 0, 'RIFF');
-        view.setUint32(4, 44 + interleaved.length * 2, true);
+
+        // -8 (via #97)
+        view.setUint32(4, 44 + interleaved.length * 2 - 8, true);
+
         writeUTFBytes(view, 8, 'WAVE');
         // FMT sub-chunk
         writeUTFBytes(view, 12, 'fmt ');
@@ -81,7 +84,7 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         // stereo (2 channels)
         view.setUint16(22, numChannels, true);
         view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 4, true);
+        view.setUint32(28, sampleRate * numChannels * 2, true); // numChannels * 2 (via #71)
         view.setUint16(32, numChannels * 2, true);
         view.setUint16(34, 16, true);
         // data sub-chunk

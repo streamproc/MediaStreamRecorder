@@ -74,8 +74,11 @@ Then link single/standalone "MediaStreamRecorder.js" file:
 <!-- CDN -->
 <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
 
+<!-- WWW -->
+<script src="https://www.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+
 <!-- or link specific release -->
-<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.2/MediaStreamRecorder.js"></script>
+<script src="https://github.com/streamproc/MediaStreamRecorder/releases/download/1.3.3/MediaStreamRecorder.js"></script>
 ```
 
 ## Record audio+video
@@ -239,10 +242,18 @@ mediaRecorder.recorderType = GifRecorder;
 
 ## `audioChannels`
 
+> To choose between Stereo or Mono audio.
+
 It is an integer value that accepts either 1 or 2. "1" means record only left-channel and skip right-one. The default value is "2".
 
 ```javascript
 mediaRecorder.audioChannels = 1;
+```
+
+Note: It requires following recorderType:
+
+```javascript
+mediaRecorder.recorderType = StereoAudioRecorder;
 ```
 
 ## `bufferSize`

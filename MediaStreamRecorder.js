@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-15 5:22:54 AM UTC
+// Last time updated: 2016-07-03 8:17:15 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -637,7 +637,6 @@ function MediaRecorderWrapper(mediaStream) {
             self.mimeType = IsChrome ? 'audio/webm' : 'audio/ogg';
         }
 
-        self.blob = null;
         self.dontFireOnDataAvailableEvent = false;
 
         var recorderHints = {
@@ -664,7 +663,13 @@ function MediaRecorderWrapper(mediaStream) {
 
         // starting a recording session; which will initiate "Reading Thread"
         // "Reading Thread" are used to prevent main-thread blocking scenarios
-        mediaRecorder = new MediaRecorder(mediaStream, recorderHints);
+        try {
+            mediaRecorder = new MediaRecorder(mediaStream, recorderHints);
+        } catch (e) {
+            // if someone passed NON_supported mimeType
+            // or if Firefox on Android
+            mediaRecorder = new MediaRecorder(mediaStream);
+        }
 
         if ('canRecordMimeType' in mediaRecorder && mediaRecorder.canRecordMimeType(self.mimeType) === false) {
             if (!self.disableLogs) {
@@ -676,15 +681,21 @@ function MediaRecorderWrapper(mediaStream) {
         // when video is resumed. E.g. yourStream.getVideoTracks()[0].muted = true; // it will auto-stop recording.
         mediaRecorder.ignoreMutedMedia = self.ignoreMutedMedia || false;
 
+        var firedOnDataAvailableOnce = false;
+
         // Dispatching OnDataAvailable Handler
         mediaRecorder.ondataavailable = function(e) {
             if (self.dontFireOnDataAvailableEvent) {
                 return;
             }
 
-            if (!e.data || !e.data.size || e.data.size < 100 || self.blob) {
+            // how to fix FF-corrupt-webm issues?
+            // should we leave this?          e.data.size < 26800
+            if (!e.data || !e.data.size || e.data.size < 26800 || firedOnDataAvailableOnce) {
                 return;
             }
+
+            firedOnDataAvailableOnce = true;
 
             var blob = self.getNativeBlob ? e.data : new Blob([e.data], {
                 type: self.mimeType || 'video/webm'
@@ -693,8 +704,11 @@ function MediaRecorderWrapper(mediaStream) {
             self.ondataavailable(blob);
 
             self.dontFireOnDataAvailableEvent = true;
-            mediaRecorder.stop();
-            mediaRecorder = null;
+
+            if (!!mediaRecorder) {
+                mediaRecorder.stop();
+                mediaRecorder = null;
+            }
 
             // record next interval
             self.start(timeSlice, '__disableLogs');
@@ -723,7 +737,7 @@ function MediaRecorderWrapper(mediaStream) {
             // if the timeSlice value is small. Callers should 
             // consider timeSlice as a minimum value
 
-            if (mediaRecorder.state !== 'inactive' && mediaRecorder.state !== 'stopped') {
+            if (!!mediaRecorder && mediaRecorder.state !== 'inactive' && mediaRecorder.state !== 'stopped') {
                 mediaRecorder.stop();
             }
         };
@@ -733,7 +747,11 @@ function MediaRecorderWrapper(mediaStream) {
         // handler. "mTimeSlice < 0" means Session object does not push encoded data to
         // onDataAvailable, instead, it passive wait the client side pull encoded data
         // by calling requestData API.
-        mediaRecorder.start(3.6e+6);
+        try {
+            mediaRecorder.start(3.6e+6);
+        } catch (e) {
+            mediaRecorder = null;
+        }
 
         setTimeout(function() {
             if (!mediaRecorder) {
@@ -776,7 +794,7 @@ function MediaRecorderWrapper(mediaStream) {
 
             setTimeout(function() {
                 self.dontFireOnDataAvailableEvent = true;
-                if (mediaRecorder.state === 'recording') {
+                if (!!mediaRecorder && mediaRecorder.state === 'recording') {
                     mediaRecorder.stop();
                 }
                 mediaRecorder = null;
@@ -1004,13 +1022,13 @@ function StereoAudioRecorderHelper(mediaStream, root) {
 
         // we flat the left and right channels down
         var leftBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
-        var rightBuffer = mergeBuffers(internalLeftChannel, internalRecordingLength);
+
+        var interleaved = leftBuffer;
 
         // we interleave both channels together
         if (numChannels === 2) {
-            var interleaved = interleave(leftBuffer, rightBuffer);
-        } else {
-            var interleaved = leftBuffer;
+            var rightBuffer = mergeBuffers(internalRightChannel, internalRecordingLength); // bug fixed via #70,#71
+            interleaved = interleave(leftBuffer, rightBuffer);
         }
 
         // we create our wav file
@@ -1019,7 +1037,10 @@ function StereoAudioRecorderHelper(mediaStream, root) {
 
         // RIFF chunk descriptor
         writeUTFBytes(view, 0, 'RIFF');
-        view.setUint32(4, 44 + interleaved.length * 2, true);
+
+        // -8 (via #97)
+        view.setUint32(4, 44 + interleaved.length * 2 - 8, true);
+
         writeUTFBytes(view, 8, 'WAVE');
         // FMT sub-chunk
         writeUTFBytes(view, 12, 'fmt ');
@@ -1028,7 +1049,7 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         // stereo (2 channels)
         view.setUint16(22, numChannels, true);
         view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 4, true);
+        view.setUint32(28, sampleRate * numChannels * 2, true); // numChannels * 2 (via #71)
         view.setUint16(32, numChannels * 2, true);
         view.setUint16(34, 16, true);
         // data sub-chunk
