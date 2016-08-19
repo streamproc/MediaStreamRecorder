@@ -1,4 +1,4 @@
-// Last time updated: 2016-07-03 8:51:35 AM UTC
+// Last time updated: 2016-08-19 11:58:57 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -706,10 +706,10 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.dontFireOnDataAvailableEvent = true;
 
-            if (!!mediaRecorder) {
+            if (!!mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
-                mediaRecorder = null;
             }
+            mediaRecorder = null;
 
             // record next interval
             self.start(timeSlice, '__disableLogs');

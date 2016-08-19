@@ -113,10 +113,10 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.dontFireOnDataAvailableEvent = true;
 
-            if (!!mediaRecorder) {
+            if (!!mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
-                mediaRecorder = null;
             }
+            mediaRecorder = null;
 
             // record next interval
             self.start(timeSlice, '__disableLogs');
