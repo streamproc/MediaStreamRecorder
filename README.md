@@ -2,13 +2,6 @@
 
 [![npm](https://img.shields.io/npm/v/msr.svg)](https://npmjs.org/package/msr) [![downloads](https://img.shields.io/npm/dm/msr.svg)](https://npmjs.org/package/msr) [![Build Status: Linux](https://travis-ci.org/streamproc/MediaStreamRecorder.png?branch=master)](https://travis-ci.org/streamproc/MediaStreamRecorder)
 
-A cross-browser implementation to record audio/video streams:
-
-1. MediaStreamRecorder can record both audio and video in single WebM file on Firefox.
-2. MediaStreamRecorder can record audio as WAV and video as either WebM or animated gif on Chrome.
-
-MediaStreamRecorder is useful in scenarios where you're planning to submit/upload recorded blobs in realtime to the server! You can get blobs after specific time-intervals.
-
 ## [Demos](https://www.webrtc-experiment.com/msr/) using [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library
 
 | Experiment Name        | Demo           | Source Code |
@@ -17,6 +10,13 @@ MediaStreamRecorder is useful in scenarios where you're planning to submit/uploa
 | **Video Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/video-recorder.html) |
 | **Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/gif-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/gif-recorder.html) |
 | **MultiStreamRecorder Demo** | [Demo](https://www.webrtc-experiment.com/msr/MultiStreamRecorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/MultiStreamRecorder.html) |
+
+A cross-browser implementation to record audio/video streams:
+
+1. MediaStreamRecorder can record both audio and video in single WebM file on Firefox.
+2. MediaStreamRecorder can record audio as WAV and video as either WebM or animated gif on Chrome.
+
+MediaStreamRecorder is useful in scenarios where you're planning to submit/upload recorded blobs in realtime to the server! You can get blobs after specific time-intervals.
 
 ----
 
@@ -49,7 +49,7 @@ console.log('MediaStreamRecorder', recorder);
 
 console.log('\n\n-------\n\n');
 
-var multiStreamRecorder = new MediaStreamRecorder.MultiStreamRecorder({});
+var multiStreamRecorder = new MediaStreamRecorder.MultiStreamRecorder([]);
 console.log('MultiStreamRecorder', multiStreamRecorder);
 ```
 
@@ -109,6 +109,23 @@ function onMediaError(e) {
 }
 </script>
 ```
+
+## Record Multiple Videos
+
+> Record multiple videos in single WebM file.
+
+```javascript
+var arrayOfStreams = [yourVideo, screen, remoteVideo1, remoteVideo2];
+var multiStreamRecorder = new MultiStreamRecorder( arrayOfStreams );
+```
+
+You can add additional streams at runtime:
+
+```javascript
+multiStreamRecorder.addStream( anotherStream );
+```
+
+Currently, you can only record 4-maximum videos in single WebM container.
 
 ## Record audio/wav
 
@@ -283,7 +300,6 @@ It is recommended to pass your HTMLVideoElement to get most accurate result.
 videoRecorder.video = yourHTMLVideoElement;
 videoRecorder.onStartedDrawingNonBlankFrames = function() {
     // record audio here to fix sync issues
-    // Note: MultiStreamRecorder auto handles audio sync issues.
     videoRecorder.clearOldRecordedFrames(); // clear all blank frames
     audioRecorder.start(interval);
 };
