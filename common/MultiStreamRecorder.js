@@ -125,7 +125,14 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
             console.error('Upgrade to latest Chrome or otherwise enable this flag: chrome://flags/#enable-experimental-web-platform-features');
         }
 
-        return capturedStream;
+        var videoStream = new MediaStream();
+
+        // via #126
+        capturedStream.getVideoTracks().forEach(function(track) {
+            videoStream.addTrack(track);
+        });
+
+        return videoStream;
     }
 
     function getVideo(stream) {

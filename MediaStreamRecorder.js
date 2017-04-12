@@ -1,4 +1,4 @@
-// Last time updated: 2017-02-21 8:23:06 AM UTC
+// Last time updated: 2017-04-12 11:03:58 AM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -271,7 +271,14 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
             console.error('Upgrade to latest Chrome or otherwise enable this flag: chrome://flags/#enable-experimental-web-platform-features');
         }
 
-        return capturedStream;
+        var videoStream = new MediaStream();
+
+        // via #126
+        capturedStream.getVideoTracks().forEach(function(track) {
+            videoStream.addTrack(track);
+        });
+
+        return videoStream;
     }
 
     function getVideo(stream) {
