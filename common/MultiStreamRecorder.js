@@ -55,6 +55,8 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
             self.ondataavailable(blob);
         };
 
+        mediaRecorder.onstop = self.onstop;
+
         drawVideosToCanvas();
 
         mediaRecorder.start(timeSlice);
@@ -273,6 +275,8 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
         }
         console.log('ondataavailable', blob);
     };
+
+    this.onstop = function() {};
 }
 
 if (typeof MediaStreamRecorder !== 'undefined') {

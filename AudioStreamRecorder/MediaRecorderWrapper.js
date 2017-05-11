@@ -206,6 +206,7 @@ function MediaRecorderWrapper(mediaStream) {
                     mediaRecorder.stop();
                 }
                 mediaRecorder = null;
+                self.onstop();
             }, 2000);
         }
     };
@@ -282,6 +283,8 @@ function MediaRecorderWrapper(mediaStream) {
         this.dontFireOnDataAvailableEvent = true;
         this.stop();
     };
+
+    this.onstop = function() {};
 
     // Reference to "MediaRecorder" object
     var mediaRecorder;

@@ -1,4 +1,4 @@
-// Last time updated: 2017-04-12 11:03:58 AM UTC
+// Last time updated: 2017-05-11 12:16:52 PM UTC
 
 // links:
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
@@ -200,6 +200,8 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
         mediaRecorder.ondataavailable = function(blob) {
             self.ondataavailable(blob);
         };
+
+        mediaRecorder.onstop = self.onstop;
 
         drawVideosToCanvas();
 
@@ -419,6 +421,8 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
         }
         console.log('ondataavailable', blob);
     };
+
+    this.onstop = function() {};
 }
 
 if (typeof MediaStreamRecorder !== 'undefined') {
@@ -952,6 +956,7 @@ function MediaRecorderWrapper(mediaStream) {
                     mediaRecorder.stop();
                 }
                 mediaRecorder = null;
+                self.onstop();
             }, 2000);
         }
     };
@@ -1029,6 +1034,8 @@ function MediaRecorderWrapper(mediaStream) {
         this.stop();
     };
 
+    this.onstop = function() {};
+
     // Reference to "MediaRecorder" object
     var mediaRecorder;
 
@@ -1087,6 +1094,7 @@ function StereoAudioRecorder(mediaStream) {
         if (mediaRecorder) {
             mediaRecorder.stop();
             clearTimeout(timeout);
+            this.onstop();
         }
     };
 
@@ -1107,6 +1115,7 @@ function StereoAudioRecorder(mediaStream) {
     };
 
     this.ondataavailable = function() {};
+    this.onstop = function() {};
 
     // Reference to "StereoAudioRecorder" object
     var mediaRecorder;
@@ -1250,6 +1259,7 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         this.requestData();
 
         audioInput.disconnect();
+        this.onstop();
     };
 
     function interleave(leftChannel, rightChannel) {
@@ -1356,6 +1366,8 @@ function StereoAudioRecorderHelper(mediaStream, root) {
         isPaused = false;
     };
 
+    this.onstop = function() {};
+
     // http://webaudio.github.io/web-audio-api/#the-scriptprocessornode-interface
     scriptprocessornode.onaudioprocess = function(e) {
         if (!recording || requestDataInvoked || isPaused) {
@@ -1408,8 +1420,11 @@ function WhammyRecorder(mediaStream) {
         if (mediaRecorder) {
             mediaRecorder.stop();
             clearTimeout(timeout);
+            this.onstop();
         }
     };
+
+    this.onstop = function() {};
 
     this.clearOldRecordedFrames = function() {
         if (mediaRecorder) {
@@ -1590,6 +1605,7 @@ function WhammyRecorderHelper(mediaStream, root) {
     this.stop = function() {
         isStopDrawing = true;
         this.requestData();
+        this.onstop();
     };
 
     var canvas = document.createElement('canvas');
@@ -1739,6 +1755,8 @@ function WhammyRecorderHelper(mediaStream, root) {
     this.resume = function() {
         isPaused = false;
     };
+
+    this.onstop = function() {};
 }
 
 if (typeof MediaStreamRecorder !== 'undefined') {
@@ -1846,8 +1864,11 @@ function GifRecorder(mediaStream) {
             cancelAnimationFrame(lastAnimationFrame);
             clearTimeout(timeout);
             doneRecording();
+            this.onstop();
         }
     };
+
+    this.onstop = function() {};
 
     var isPaused = false;
 
