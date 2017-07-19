@@ -218,6 +218,9 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
         mediaRecorder.stop(function(blob) {
             callback(blob);
         });
+				
+		// via: @suhaibjanjua -> issue #50
+        self.audioContext.close();
     };
 
     function getMixedAudioStream() {

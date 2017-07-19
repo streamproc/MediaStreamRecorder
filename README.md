@@ -519,6 +519,7 @@ videoRecorder.speed = 100;
 1. [Muaz Khan](https://github.com/muaz-khan)
 2. [neizerth](https://github.com/neizerth)
 3. [andersaloof](https://github.com/andersaloof)
+4. [Suhaib Janjua](https://github.com/suhaibjanjua)
 
 ## License
 
