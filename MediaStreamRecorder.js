@@ -1,26 +1,16 @@
-// Last time updated: 2017-05-11 12:16:52 PM UTC
+'use strict';
 
-// links:
+// Last time updated: 2017-07-29 8:42:43 AM UTC
+
+// __________________________
+// MediaStreamRecorder v1.3.4
+
 // Open-Sourced: https://github.com/streamproc/MediaStreamRecorder
-// https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js
-// https://www.WebRTC-Experiment.com/MediaStreamRecorder.js
-// npm install msr
 
-//------------------------------------
-
-// Browsers Support::
-// Chrome (all versions) [ audio/video separately ]
-// Firefox ( >= 29 ) [ audio/video in single webm/mp4 container or only audio in ogg ]
-// Opera (all versions) [ same as chrome ]
-// Android (Chrome) [ only video ]
-// Android (Opera) [ only video ]
-// Android (Firefox) [ only video ]
-// Microsoft Edge (Only Audio & Gif)
-
-//------------------------------------
+// --------------------------------------------------
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.WebRTC-Experiment.com/licence
-//------------------------------------
+// --------------------------------------------------
 
 // ______________________
 // MediaStreamRecorder.js
@@ -94,6 +84,7 @@ function MediaStreamRecorder(mediaStream) {
     };
 
     this.ondataavailable = function(blob) {
+        if (this.disableLogs) return;
         console.log('ondataavailable..', blob);
     };
 
@@ -120,6 +111,8 @@ function MediaStreamRecorder(mediaStream) {
             return;
         }
         mediaRecorder.pause();
+
+        if (this.disableLogs) return;
         console.log('Paused recording.', this.mimeType || mediaRecorder.mimeType);
     };
 
@@ -128,6 +121,8 @@ function MediaStreamRecorder(mediaStream) {
             return;
         }
         mediaRecorder.resume();
+
+        if (this.disableLogs) return;
         console.log('Resumed recording.', this.mimeType || mediaRecorder.mimeType);
     };
 
@@ -222,8 +217,17 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
 
     function getMixedAudioStream() {
         // via: @pehrsons
-        self.audioContext = new AudioContext();
-        var audioSources = [];
+        if (!ObjectStore.AudioContextConstructor) {
+            ObjectStore.AudioContextConstructor = new ObjectStore.AudioContext();
+        }
+
+        self.audioContext = ObjectStore.AudioContextConstructor;
+
+        self.audioSources = [];
+
+        self.gainNode = self.audioContext.createGain();
+        self.gainNode.connect(self.audioContext.destination);
+        self.gainNode.gain.value = 0; // don't hear self
 
         var audioTracksLength = 0;
         arrayOfMediaStreams.forEach(function(stream) {
@@ -233,7 +237,9 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
 
             audioTracksLength++;
 
-            audioSources.push(self.audioContext.createMediaStreamSource(stream));
+            var audioSource = self.audioContext.createMediaStreamSource(stream);
+            audioSource.connect(self.gainNode);
+            self.audioSources.push(audioSource);
         });
 
         if (!audioTracksLength) {
@@ -241,7 +247,7 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
         }
 
         self.audioDestination = self.audioContext.createMediaStreamDestination();
-        audioSources.forEach(function(audioSource) {
+        self.audioSources.forEach(function(audioSource) {
             audioSource.connect(self.audioDestination);
         });
         return self.audioDestination.stream;
@@ -382,12 +388,39 @@ function MultiStreamRecorder(arrayOfMediaStreams) {
 
     this.clearRecordedData = function() {
         videos = [];
-        context.clearRect(0, 0, canvas.width, canvas.height);
+
         isStoppedRecording = false;
         mediaRecorder = null;
 
         if (mediaRecorder) {
             mediaRecorder.clearRecordedData();
+        }
+
+        if (self.gainNode) {
+            self.gainNode.disconnect();
+            self.gainNode = null;
+        }
+
+        if (self.audioSources.length) {
+            self.audioSources.forEach(function(source) {
+                source.disconnect();
+            });
+            self.audioSources = [];
+        }
+
+        if (self.audioDestination) {
+            self.audioDestination.disconnect();
+            self.audioDestination = null;
+        }
+
+        // maybe "audioContext.close"?
+        self.audioContext = null;
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (canvas.stream) {
+            canvas.stream.stop();
+            canvas.stream = null;
         }
     };
 
@@ -742,12 +775,6 @@ function isMediaRecorderCompatible() {
     return majorVersion >= 49;
 }
 
-// ______________ (used to handle stuff like http://goo.gl/xmE5eg) issue #129
-// ObjectStore.js
-var ObjectStore = {
-    AudioContext: window.AudioContext || window.webkitAudioContext
-};
-
 // ==================
 // MediaRecorder.js
 
@@ -770,9 +797,11 @@ function MediaRecorderWrapper(mediaStream) {
      * @method
      * @memberof MediaStreamRecorder
      * @example
-     * recorder.record();
+     * recorder.start(5000);
      */
     this.start = function(timeSlice, __disableLogs) {
+        this.timeSlice = timeSlice || 5000;
+
         if (!self.mimeType) {
             self.mimeType = 'video/webm';
         }
@@ -843,13 +872,9 @@ function MediaRecorderWrapper(mediaStream) {
 
         // Dispatching OnDataAvailable Handler
         mediaRecorder.ondataavailable = function(e) {
-            if (self.dontFireOnDataAvailableEvent) {
-                return;
-            }
-
             // how to fix FF-corrupt-webm issues?
             // should we leave this?          e.data.size < 26800
-            if (!e.data || !e.data.size || e.data.size < 26800 || firedOnDataAvailableOnce) {
+            if (!e.data || /*!e.data.size || e.data.size < 26800 || */ firedOnDataAvailableOnce) {
                 return;
             }
 
@@ -861,12 +886,16 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.ondataavailable(blob);
 
-            self.dontFireOnDataAvailableEvent = true;
+            // self.dontFireOnDataAvailableEvent = true;
 
             if (!!mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
             }
             mediaRecorder = null;
+
+            if (self.dontFireOnDataAvailableEvent) {
+                return;
+            }
 
             // record next interval
             self.start(timeSlice, '__disableLogs');
@@ -976,6 +1005,8 @@ function MediaRecorderWrapper(mediaStream) {
         if (mediaRecorder.state === 'recording') {
             mediaRecorder.pause();
         }
+
+        this.dontFireOnDataAvailableEvent = true;
     };
 
     /**
@@ -1002,7 +1033,7 @@ function MediaRecorderWrapper(mediaStream) {
 
             var disableLogs = self.disableLogs;
             self.disableLogs = true;
-            this.record();
+            this.start(this.timeslice || 5000);
             self.disableLogs = disableLogs;
             return;
         }

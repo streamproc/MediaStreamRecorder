@@ -20,9 +20,11 @@ function MediaRecorderWrapper(mediaStream) {
      * @method
      * @memberof MediaStreamRecorder
      * @example
-     * recorder.record();
+     * recorder.start(5000);
      */
     this.start = function(timeSlice, __disableLogs) {
+        this.timeSlice = timeSlice || 5000;
+
         if (!self.mimeType) {
             self.mimeType = 'video/webm';
         }
@@ -93,13 +95,9 @@ function MediaRecorderWrapper(mediaStream) {
 
         // Dispatching OnDataAvailable Handler
         mediaRecorder.ondataavailable = function(e) {
-            if (self.dontFireOnDataAvailableEvent) {
-                return;
-            }
-
             // how to fix FF-corrupt-webm issues?
             // should we leave this?          e.data.size < 26800
-            if (!e.data || !e.data.size || e.data.size < 26800 || firedOnDataAvailableOnce) {
+            if (!e.data || /*!e.data.size || e.data.size < 26800 || */ firedOnDataAvailableOnce) {
                 return;
             }
 
@@ -111,12 +109,16 @@ function MediaRecorderWrapper(mediaStream) {
 
             self.ondataavailable(blob);
 
-            self.dontFireOnDataAvailableEvent = true;
+            // self.dontFireOnDataAvailableEvent = true;
 
             if (!!mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
             }
             mediaRecorder = null;
+
+            if (self.dontFireOnDataAvailableEvent) {
+                return;
+            }
 
             // record next interval
             self.start(timeSlice, '__disableLogs');
@@ -226,6 +228,8 @@ function MediaRecorderWrapper(mediaStream) {
         if (mediaRecorder.state === 'recording') {
             mediaRecorder.pause();
         }
+
+        this.dontFireOnDataAvailableEvent = true;
     };
 
     /**
@@ -252,7 +256,7 @@ function MediaRecorderWrapper(mediaStream) {
 
             var disableLogs = self.disableLogs;
             self.disableLogs = true;
-            this.record();
+            this.start(this.timeslice || 5000);
             self.disableLogs = disableLogs;
             return;
         }
