@@ -1803,7 +1803,7 @@ function WhammyRecorderHelper(mediaStream, root) {
             try{
                 video.srcObject = mediaStream
             }catch(err){
-				video.src = URL.createObjectURL(mediaStream);
+                video.src = URL.createObjectURL(mediaStream);
             }
 
             video.width = this.video.width;
